@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>1st Anniversary & Proposal</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti (폭죽 효과) -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- html2canvas (캡쳐 기능) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
@@ -18,10 +14,9 @@
             font-family: 'M PLUS Rounded 1c', sans-serif;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: white;
-            /* overflow: hidden; 모바일 스크롤 허용을 위해 제거 */
+            overflow-x: hidden;
         }
 
-        /* 하트 배경 애니메이션 */
         .heart-bg {
             position: absolute;
             top: -10vh;
@@ -37,7 +32,6 @@
             100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* 편지 텍스트 페이드 인/아웃 효과 */
         .fade-text {
             opacity: 0;
             transition: opacity 1.5s ease-in-out;
@@ -46,29 +40,28 @@
             opacity: 1;
         }
 
-        /* 텍스트 글로우 효과 */
         .text-glow {
             text-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
         }
 
-        /* 각 화면 컨테이너 (스크롤 제어 포함) */
         .screen {
             display: none;
             width: 100%;
-            height: 100dvh;
+            min-height: 100dvh;
             position: absolute;
             inset: 0;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .screen.active {
             display: flex;
         }
 
-        /* NO 버튼 이동 애니메이션을 위한 트랜지션 */
         #btn-no {
             transition: all 0.2s ease;
         }
 
-        /* 모달 스크롤 대응 */
         #video-modal {
             display: none;
         }
@@ -77,7 +70,6 @@
             opacity: 1;
         }
 
-        /* 디버깅용 토스트 알림 */
         #debug-toast {
             position: fixed;
             bottom: 30px;
@@ -97,139 +89,294 @@
         #debug-toast.show {
             opacity: 1;
         }
+
+        #mega-anniversary-event {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            pointer-events: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%);
+        }
+        #mega-anniversary-event.show {
+            display: flex;
+        }
+
+        .firework-text-glow {
+            text-align: center;
+            font-weight: 900;
+            line-height: 1.3;
+            color: #fff;
+            text-shadow: 
+                0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0055, 
+                0 0 40px #ff0055, 0 0 60px #ff0055, 0 0 80px #ff0055, 0 0 100px #ff0055;
+            animation: explodeText 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseGlow 2s infinite alternate 1.5s;
+        }
+
+        @keyframes explodeText {
+            0% { transform: scale(0); opacity: 0; filter: brightness(3); }
+            60% { transform: scale(1.1); opacity: 1; filter: brightness(2); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
+
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0055, 0 0 40px #ff0055, 0 0 60px #ff0055; transform: scale(1); }
+            100% { text-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 50px #ff0055, 0 0 70px #ff0055, 0 0 100px #ff0055, 0 0 120px #ff0055; transform: scale(1.05); }
+        }
+
+        .screen-shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-15px, 15px) rotate(-2deg); }
+            40% { transform: translate(15px, -15px) rotate(2deg); }
+            60% { transform: translate(-15px, -15px) rotate(-2deg); }
+            80% { transform: translate(15px, 15px) rotate(2deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        .romantic-seq {
+            position: absolute;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 1.5s ease, transform 3s ease-out;
+            pointer-events: none;
+            width: 100%;
+        }
+        .romantic-seq.active {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        #finale-text {
+            opacity: 0;
+            transform: scale(0.1);
+        }
+        #finale-text.active {
+            animation: explodeText 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseGlow 2s infinite alternate 1.5s;
+        }
+
+        .mega-heart {
+            position: absolute;
+            font-size: 5rem;
+            animation: shootHeart linear forwards;
+            z-index: 99998;
+        }
+
+        @keyframes shootHeart {
+            0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(2) rotate(var(--rot)); opacity: 0; }
+        }
     </style>
 </head>
-<body class="w-screen h-[100dvh] flex flex-col items-center justify-center relative bg-fixed">
+<body class="w-full min-h-[100dvh] flex flex-col items-center justify-center relative bg-fixed">
 
-    <!-- 디버깅 토스트 -->
+    <!-- 오류 원인이었던 배경 이모지가 담길 컨테이너 추가 -->
+    <div id="particles" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- 화려한 폭죽 효과음 및 감동적인 BGM -->
+    <audio id="sfx-firework-1" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_03d9bd7780.mp3?filename=fireworks-1-84080.mp3" preload="auto"></audio>
+    <audio id="sfx-firework-2" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_24e9cbdbbb.mp3?filename=fireworks-2-45239.mp3" preload="auto"></audio>
+    <audio id="sfx-firework-3" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_03d9bd7780.mp3?filename=fireworks-1-84080.mp3" preload="auto"></audio>
+    <audio id="finale-bgm" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=epic-cinematic-trailer-113902.mp3" preload="auto"></audio>
+
     <div id="debug-toast"></div>
 
-    <!-- 떠다니는 배경 하트 컨테이너 -->
-    <div id="particles" class="absolute inset-0 pointer-events-none z-0 overflow-hidden"></div>
-
-    <!-- 1. 비밀번호 입력 화면 -->
-    <div id="intro-screen" class="screen active flex-col items-center justify-center p-6 z-10">
-        <h1 class="text-3xl md:text-5xl font-bold mb-8 text-center text-glow">
-            私たちが始まった日<br>
-            <span class="text-lg md:text-2xl text-gray-300 block mt-2 font-normal">우리가 시작된 날</span>
-        </h1>
-        <div class="flex flex-col items-center space-y-4">
-            <input type="password" id="password" maxlength="4" placeholder="MMDD (ex: 0911)" class="w-48 px-4 py-3 text-center text-2xl rounded-full text-gray-900 focus:outline-none focus:ring-4 focus:ring-pink-500 shadow-lg">
-            <p id="error-msg" class="text-red-400 text-sm hidden">パスワードが間違っています。<br>(비밀번호가 틀렸습니다.)</p>
-            <button id="btn-enter" class="mt-4 px-8 py-3 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] transition transform hover:scale-105">
-                開く (열기)
-            </button>
+    <div id="debug-menu" class="hidden fixed top-4 right-4 bg-gray-900/95 text-green-400 p-5 rounded-2xl border border-green-500 z-[99999] shadow-[0_0_20px_rgba(0,255,0,0.2)] flex flex-col gap-4 w-72 backdrop-blur-sm transition-all duration-300">
+        <div class="flex justify-between items-center border-b border-green-800 pb-2">
+            <h3 class="font-bold text-lg flex items-center gap-2">🛠️ Debug Menu</h3>
+            <button id="close-debug" class="text-red-400 hover:text-red-300 font-bold text-xl px-2">×</button>
         </div>
-    </div>
-
-    <!-- 2. 편지 애니메이션 화면 -->
-    <div id="letter-screen" class="screen flex-col items-center justify-center p-8 z-10 text-center">
-        <div id="letter-content" class="fade-text text-2xl md:text-4xl font-bold leading-relaxed max-w-2xl text-glow break-keep">
-            <!-- 자바스크립트로 텍스트 주입 -->
-        </div>
-    </div>
-
-    <!-- 3. 프러포즈 (YES/NO) 화면 -->
-    <div id="proposal-screen" class="screen flex-col items-center justify-center p-6 z-10">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4 text-center text-glow text-pink-400">
-            私と結婚してくれますか？
-        </h1>
-        <p class="text-xl md:text-2xl text-gray-200 mb-16 text-center">나와 결혼해 줄래?</p>
         
-        <div class="w-full max-w-md flex flex-row items-center justify-center gap-4 md:gap-8 mt-4 h-32 relative">
-            <!-- YES 버튼 -->
-            <button id="btn-yes" class="z-30 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-4 px-12 rounded-full text-2xl shadow-[0_0_20px_rgba(255,105,180,0.8)] transform hover:scale-110 transition">
-                はい (네)
-            </button>
+        <div class="space-y-2">
+            <p class="text-xs text-gray-400 font-bold">📍 화면 스킵 및 강제 이동</p>
+            <div class="grid grid-cols-2 gap-2">
+                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('intro-screen')">1. 시작</button>
+                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('letter-screen')">2. 편지</button>
+                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('proposal-screen')">3. 프러포즈</button>
+                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('success-screen')">4. 성공</button>
+            </div>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-green-900">
+            <p class="text-xs text-gray-400 font-bold">⚙️ 상태 조작</p>
+            <button class="bg-gray-800 hover:bg-gray-700 py-2 w-full rounded text-sm transition mb-2" onclick="triggerConfetti()">🎉 폭죽 강제 발사</button>
+            <button class="bg-gray-800 hover:bg-gray-700 py-2 w-full rounded text-sm transition mb-2" onclick="resetNoButton()">🔄 도망간 NO버튼 원위치</button>
             
-            <!-- NO 버튼 (도망갈 버튼) -->
-            <button id="btn-no" class="z-20 bg-gray-600/80 backdrop-blur-sm text-white font-bold py-4 px-10 rounded-full border border-gray-400 text-xl transition-all duration-200">
-                いいえ (아니요)
-            </button>
+            <button class="bg-pink-800 hover:bg-pink-700 text-white font-bold py-2 w-full rounded text-sm transition mb-2 animate-pulse" onclick="setAlmostOneYear()">⏰ 1주년 5초 전으로 세팅 (테스트)</button>
+
+            <div class="flex flex-col gap-1 mt-2">
+                <label class="text-xs text-gray-400">사귄 날짜 (카운터 조작용)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="debug-date" value="2025-09-11" class="bg-gray-900 border border-gray-600 text-green-300 text-sm px-2 py-1 rounded w-full outline-none focus:border-green-500" placeholder="YYYY-MM-DD">
+                    <button class="bg-green-800 hover:bg-green-700 text-white py-1 px-3 rounded text-sm whitespace-nowrap transition" onclick="updateGlobalDate()">적용</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 4. 성공 화면 (스크롤 가능하도록 구조 변경) -->
-    <div id="success-screen" class="screen flex-col items-center justify-start md:justify-center w-full h-[100dvh] p-4 md:p-8 relative z-10 overflow-y-auto pb-20 pt-10">
-        <h1 class="text-5xl md:text-7xl font-bold text-glow text-rose-400 mb-6 text-center animate-bounce mt-4 md:mt-0 shrink-0">ありがとう！愛してる！</h1>
-        <p class="text-2xl md:text-3xl text-white mb-8 text-center shrink-0">고마워! 평생 행복하게 해줄게!</p>
-        
-        <!-- 실시간 카운터 -->
-        <div id="live-counter" class="text-xl md:text-2xl text-pink-200 mb-8 text-center bg-black/40 px-6 py-4 rounded-3xl border border-pink-500/30 shadow-lg backdrop-blur-md shrink-0">
-            <!-- 카운터 텍스트 주입 -->
+    <div id="mega-anniversary-event">
+        <div id="seq-1" class="romantic-seq">
+            <span class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">私たちが初めて会ったあの日から...</span><br>
+            <span class="text-2xl md:text-3xl font-bold text-pink-300 drop-shadow-[0_0_15px_rgba(255,105,180,0.8)] mt-2 block">우리가 처음 만난 그 날부터...</span>
         </div>
 
-        <div class="text-8xl mb-4 shrink-0">👩‍❤️‍👨</div>
+        <div id="seq-2" class="romantic-seq">
+            <span class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">君と一緒に過ごしたすべての時間が...</span><br>
+            <span class="text-2xl md:text-3xl font-bold text-pink-300 drop-shadow-[0_0_15px_rgba(255,105,180,0.8)] mt-2 block">너와 함께한 모든 시간이...</span>
+        </div>
 
-        <!-- 숨겨진 영상 편지 버튼 (스크롤해서 볼 수 있음) -->
-        <button id="btn-hidden-video" class="mt-4 md:mt-8 mb-10 opacity-70 hover:opacity-100 transition flex flex-col items-center gap-2 cursor-pointer group shrink-0">
-            <span class="text-4xl group-hover:scale-125 transition-transform duration-300 drop-shadow-md">🎁</span>
-            <span class="text-sm text-gray-300 font-bold bg-black/50 px-3 py-1 rounded-full">선물</span>
+        <div id="seq-3" class="romantic-seq">
+            <span class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">僕にとって一番の奇跡だったよ。</span><br>
+            <span class="text-2xl md:text-3xl font-bold text-pink-300 drop-shadow-[0_0_15px_rgba(255,105,180,0.8)] mt-2 block">나에게 가장 큰 기적이었어.</span>
+        </div>
+
+        <div id="finale-text" class="firework-text-glow flex flex-col gap-4 px-4 w-full">
+            <span class="text-6xl md:text-8xl">これからも<br>よろしくね！</span>
+            <span class="text-5xl md:text-7xl text-pink-300">앞으로 잘 부탁해<br>사랑해 ❤️</span>
+        </div>
+    </div>
+
+    <div id="intro-screen" class="screen active z-10">
+        <div class="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-[0_0_20px_rgba(255,105,180,0.3)] text-center w-11/12 max-w-sm">
+            <h1 class="text-2xl font-bold mb-2 text-pink-300">私たちの記念日</h1>
+            <p class="text-sm text-gray-300 mb-6">우리의 기념일</p>
+            <div class="mb-6">
+                <input type="password" id="password" placeholder="MMDD" maxlength="4" class="w-full text-center text-2xl tracking-widest p-3 rounded-lg bg-black/30 border border-pink-400 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 transition">
+            </div>
+            <button id="btn-enter" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 active:scale-95">
+                開ける (열기)
+            </button>
+            <p id="error-msg" class="text-red-400 text-sm mt-4 hidden">パスワードが違います。(비밀번호가 틀렸습니다.)</p>
+        </div>
+    </div>
+
+    <div id="letter-screen" class="screen z-10">
+        <div class="text-center w-11/12 max-w-2xl px-4 py-8">
+            <div id="letter-content" class="fade-text text-2xl md:text-4xl font-bold leading-relaxed text-glow">
+                <!-- 편지 내용이 여기에 들어갑니다 -->
+            </div>
+        </div>
+    </div>
+
+    <div id="proposal-screen" class="screen z-10">
+        <div class="text-center bg-black/40 p-8 rounded-3xl backdrop-blur-md border border-pink-500/30 w-11/12 max-w-md">
+            <h2 class="text-3xl md:text-4xl font-bold mb-2 text-pink-300 text-glow">僕と結婚してくれませんか？</h2>
+            <p class="text-lg text-gray-300 mb-10">나와 결혼해 줄래?</p>
+            
+            <!-- 버튼들을 가로로 나란히 배치하기 위한 flex 컨테이너 -->
+            <div class="flex justify-center gap-6 relative min-h-[60px]">
+                <button id="btn-yes" class="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-110 active:scale-95 text-lg z-20">
+                    はい (네)
+                </button>
+                <button id="btn-no" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg z-20 whitespace-nowrap">
+                    いいえ (아니요)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="success-screen" class="screen z-10 flex flex-col items-center justify-center p-4 py-12">
+        <div class="text-center bg-white/10 p-8 rounded-3xl backdrop-blur-md border border-pink-500/50 shadow-[0_0_30px_rgba(255,105,180,0.5)] w-11/12 max-w-md flex flex-col items-center mb-8">
+            <div class="text-6xl mb-4 animate-bounce">💍</div>
+            <h2 class="text-3xl md:text-4xl font-bold mb-2 text-pink-300 text-glow">ありがとう！愛してるよ。</h2>
+            <p class="text-lg text-gray-300 mb-8">고마워! 사랑해.</p>
+            
+            <div class="w-full bg-black/40 rounded-2xl p-4 mb-4 border border-pink-900/50" id="live-counter">
+                <!-- 라이브 카운터가 여기에 들어갑니다 -->
+            </div>
+        </div>
+        
+        <button id="btn-hidden-video" class="mt-4 flex flex-col items-center gap-2 group cursor-pointer transition transform hover:scale-110 z-20">
+            <div class="text-4xl group-hover:animate-spin">🎁</div>
+            <span class="text-sm font-bold text-pink-300 bg-black/50 px-3 py-1 rounded-full border border-pink-500/30">プレゼント (선물)</span>
         </button>
     </div>
 
-    <!-- 5. 마지막 편지 모달 (캡쳐 가능) -->
-    <div id="video-modal" class="fixed inset-0 z-50 bg-black/90 flex-col items-center justify-start md:justify-center p-4 overflow-y-auto">
-        <!-- 캡쳐될 영역 (capture-area) -->
-        <div id="capture-area" class="my-8 md:my-0 shrink-0 bg-gradient-to-br from-[#2a1b38] to-[#42275a] p-6 md:p-10 rounded-3xl border border-pink-500/50 max-w-2xl w-full text-center relative shadow-[0_0_40px_rgba(255,105,180,0.3)]">
+    <div id="video-modal" class="fixed inset-0 bg-black/80 z-[100] items-center justify-center p-4 overflow-y-auto">
+        <div class="w-full max-w-md my-8 flex flex-col items-center relative">
             
-            <!-- 상단 하트 아이콘 -->
-            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-5xl bg-[#2a1b38] rounded-full p-2">
-                💍
-            </div>
-
-            <h2 class="text-2xl md:text-3xl font-bold text-pink-300 mb-6 mt-4">愛するみずはへ<br><span class="text-lg text-gray-300">(사랑하는 미즈하에게)</span></h2>
-            
-            <div class="space-y-6 text-base md:text-lg text-gray-100 leading-relaxed text-left break-keep mb-8">
-                <p>一生僕と一緒にいると約束してくれて、本当にありがとう。<br><span class="text-sm text-gray-400 block mt-1">평생 나와 함께 하기로 약속해줘서 정말 고마워.</span></p>
-
-                <p>あなたに出会えたことは、僕の人生で最高の幸運です。<br><span class="text-sm text-gray-400 block mt-1">당신을 만난 것은 내 인생 최고의 행운입니다.</span></p>
+            <!-- 캡쳐될 영역 시작 -->
+            <div id="capture-area" class="w-full bg-[#fdfbf7] rounded-xl shadow-2xl overflow-hidden relative">
+                <!-- 편지지 배경 장식 -->
+                <div class="absolute top-0 left-0 w-full h-12 bg-pink-100 border-b-2 border-pink-200"></div>
+                <div class="absolute top-0 right-0 w-16 h-16 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffb6c1%22><path d=%22M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z%22/></svg>')] opacity-20 transform translate-x-2 -translate-y-2"></div>
                 
-                <p>毎日あなたの笑顔を見るだけで、僕の一日は完璧になります。言葉も文化も違う私たちが、こうして深く愛し合えることが今でも奇跡のように感じます。<br><span class="text-sm text-gray-400 block mt-1">매일 당신의 미소를 보는 것만으로 내 하루는 완벽해져요. 언어도 문화도 다른 우리가 이렇게 깊게 사랑할 수 있다는 게 지금도 기적처럼 느껴져요.</span></p>
+                <div class="px-6 py-10 pt-16 text-gray-800">
+                    <h3 class="text-2xl font-bold text-pink-600 mb-6 font-serif border-b border-pink-200 pb-2">みずは様へ (미즈하님께)</h3>
+                    
+                    <div class="space-y-6 text-[15px] leading-relaxed">
+                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
+                            <p class="font-bold text-gray-900 mb-1">一生僕と一緒にいると約束してくれて、本当にありがとう。</p>
+                            <p class="text-sm text-gray-500">평생 나와 함께 하기로 약속해줘서 정말 고마워.</p>
+                        </div>
 
-                <p>時には喧嘩することもあるかもしれないけれど、いつも互いを思いやり、手を繋いで一緒に歩んでいきましょう。<br><span class="text-sm text-gray-400 block mt-1">때로는 다툴 때도 있겠지만, 항상 서로를 배려하며 손잡고 함께 걸어가요.</span></p>
+                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
+                            <p class="font-bold text-gray-900 mb-1">僕のすべてであるあなたを、これから一生かけて守り抜きます。</p>
+                            <p class="text-sm text-gray-500">나의 모든 것인 당신을, 앞으로 평생을 걸쳐 지켜낼게.</p>
+                        </div>
 
-                <p>僕の妻になってくれて、本当にありがとう。世界で一番幸せにします。<br><span class="text-sm text-gray-400 block mt-1">내 아내가 되어주어서 정말 고마워. 세상에서 제일 행복하게 해줄게.</span></p>
+                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
+                            <p class="font-bold text-gray-900 mb-1">どんな困難があっても、あなたと一緒ならすべて乗り越えられると信じています。</p>
+                            <p class="text-sm text-gray-500">어떤 어려움이 있어도, 당신과 함께라면 모두 이겨낼 수 있다고 믿어.</p>
+                        </div>
+                        
+                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
+                            <p class="font-bold text-gray-900 mb-1">世界で一番美しい私の花嫁、これからもずっとよろしくね。</p>
+                            <p class="text-sm text-gray-500">세상에서 가장 아름다운 나의 신부, 앞으로도 영원히 잘 부탁해.</p>
+                        </div>
+
+                        <div class="text-right pt-6 mt-4 border-t border-pink-200 font-serif">
+                            <p class="text-lg font-bold text-pink-600 mb-1">あなたを永遠に愛するドンちゃんより</p>
+                            <p class="text-sm text-gray-400">당신을 영원히 사랑하는 동짱이</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <div class="text-right text-pink-300 font-bold mt-8 text-xl">
-                - あなたを永遠に愛するドンちゃんより -<br>
-                <span class="text-sm text-gray-400">(당신을 영원히 사랑하는 동짱이)</span>
+            <!-- 캡쳐될 영역 끝 -->
+
+            <!-- 캡쳐 및 닫기 버튼 (캡쳐 시 안보임) -->
+            <div class="flex flex-col gap-3 w-full mt-6">
+                <button id="capture-btn" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center justify-center gap-2 transition active:scale-95">
+                    <span>📸</span> 画像として保存 (이미지로 간직하기)
+                </button>
+                <button id="close-modal" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition active:scale-95">
+                    閉じる (닫기)
+                </button>
             </div>
-        </div>
-
-        <!-- 버튼 영역 (캡쳐 시 무시됨: data-html2canvas-ignore) -->
-        <div class="flex flex-col md:flex-row gap-4 mt-6 mb-10 shrink-0" data-html2canvas-ignore="true">
-            <!-- 캡쳐 버튼 -->
-            <button id="capture-btn" class="px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-full hover:scale-105 transition shadow-lg flex items-center justify-center gap-2">
-                📸 画像として保存 (이 편지 간직하기)
-            </button>
-
-            <!-- 닫기 버튼 -->
-            <button id="close-modal" class="px-8 py-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full transition shadow-lg">
-                閉じる (닫기)
-            </button>
         </div>
     </div>
 
     <script>
         // --- 1. 배경 이모지 생성 함수 ---
         function createFallingEmoji() {
+            // particles 요소가 있는지 먼저 확인
+            const particlesContainer = document.getElementById('particles');
+            if (!particlesContainer) return; 
+
             const emojiEl = document.createElement('div');
             emojiEl.classList.add('heart-bg');
             
-            // 다양한 로맨틱 이모지 배열
-            const emojis = ['❤', '🌸', '✨', '💖', '🌷', '🥰', '💍', '🥂', '💌'];
+            const emojis = ['🌸', '✨', '🌷', '💍', '💌', '💖', '🥰', '🥂', '❤️'];
             emojiEl.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
             
             emojiEl.style.left = Math.random() * 100 + 'vw';
             emojiEl.style.animationDuration = (Math.random() * 5 + 5) + 's';
             emojiEl.style.opacity = Math.random() * 0.5 + 0.3;
             emojiEl.style.fontSize = (Math.random() * 2 + 1) + 'rem';
-            document.getElementById('particles').appendChild(emojiEl);
+            
+            particlesContainer.appendChild(emojiEl);
 
             setTimeout(() => {
-                emojiEl.remove();
+                if (emojiEl.parentNode) {
+                    emojiEl.remove();
+                }
             }, 10000);
         }
         setInterval(createFallingEmoji, 300);
@@ -258,24 +405,23 @@
             }
         });
 
-        // 엔터키 지원
         passwordInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 btnEnter.click();
             }
         });
 
-        // --- 4. 편지 애니메이션 (길어진 내용 및 '당신(あなた)' 적용) ---
+        // --- 4. 편지 애니메이션 ---
         const letters = [
-            { jp: "あなたへ", ko: "당신에게" },
+            { jp: "みずはへ", ko: "미즈하에게" },
             { jp: "私たちが一緒に過ごして、もう1年が経ちましたね。", ko: "우리가 함께한 지 벌써 1년이 지났네요." },
             { jp: "この1年間、本当にありがとう。", ko: "이 1년 동안, 정말 고마워요." },
-            { jp: "あなたのおかげで、私はまともな人に変わることができました。", ko: "당신의 가르침 덕분에, 저는 제대로 된 사람으로 바뀔 수 있었어요." },
-            { jp: "私がどんな姿でも、いつも信じて支えてくれてありがとう。", ko: "내가 어떤 모습이든, 언제나 믿고 지지해 줘서 고마워요." },
-            { jp: "あなたの優しさと愛が、私をより良い人に成長させてくれました。", ko: "당신의 다정함과 사랑이, 나를 더 나은 사람으로 성장하게 해줬어요." },
-            { jp: "これからもずっと、あなたのそばで笑わせてあげたいです。", ko: "앞으로도 계속, 당신 곁에서 웃게 해주고 싶어요." },
+            { jp: "あなたの教えのおかげで、私はまともな人に変わることができました。（笑）", ko: "당신의 가르침 덕분에, 저는 제대로 된 사람으로 바뀔 수 있었어요. (웃음)" },
+            { jp: "私がどんな姿でも、いつも信じて支えてくれて本当に感謝しています。", ko: "내가 어떤 모습이든, 언제나 믿고 지지해 줘서 정말 감사해요." },
+            { jp: "あなたの優しさと大きな愛が、私をより良い人に成長させてくれました。", ko: "당신의 다정함과 큰 사랑이, 나를 더 나은 사람으로 성장하게 해줬어요." },
+            { jp: "これからもずっと、あなたのそばであなたを笑わせてあげたいです。", ko: "앞으로도 계속, 당신 곁에서 당신을 웃게 해주고 싶어요." },
             { jp: "どんな困難があっても、あなたと一緒なら乗り越えられると信じています。", ko: "어떤 어려움이 있어도, 당신과 함께라면 이겨낼 수 있다고 믿어요." },
-            { jp: "私の残りの人生を、あなたと一緒に歩んでいきたい。", ko: "내 남은 인생을, 당신과 함께 걸어가고 싶어요." }
+            { jp: "私の残りの人生すべてを、あなたと一緒に歩んでいきたいです。", ko: "내 남은 인생 전부를, 당신과 함께 걸어가고 싶어요." }
         ];
 
         let currentLetterIndex = 0;
@@ -284,30 +430,25 @@
 
         function startLetterAnimation() {
             if (currentLetterIndex < letters.length) {
-                // 텍스트 설정
                 letterContent.innerHTML = `
                     <p class="text-pink-300 mb-4">${letters[currentLetterIndex].jp}</p>
                     <p class="text-lg md:text-xl text-gray-400 font-normal">${letters[currentLetterIndex].ko}</p>
                 `;
                 
-                // 나타나기
                 const t1 = setTimeout(() => {
                     letterContent.classList.add('show');
                 }, 100);
 
-                // 3초 후 사라지기
                 const t2 = setTimeout(() => {
                     letterContent.classList.remove('show');
                     currentLetterIndex++;
                     
-                    // 다음 문장으로 (1초 대기)
                     const t3 = setTimeout(startLetterAnimation, 1500);
                     letterTimeouts.push(t3);
                 }, 4000);
 
                 letterTimeouts.push(t1, t2);
             } else {
-                // 편지가 모두 끝나면 프러포즈 화면으로
                 showScreen('proposal-screen');
                 initNoButton();
             }
@@ -322,17 +463,17 @@
             "えっ？ (어?)",
             "本気？ (진심이야?)",
             "もう一度考えて！ (다시 생각해봐!)",
+            "冗談でしょ？ (농담이지?)",
             "押させないよ！ (못 누를걸!)",
-            "お願い！YESを押して！ (제발! YES를 눌러!)"
+            "お願い！YESを押して！ (제발 YES를 눌러!)"
         ];
 
         function initNoButton() {
             if (noBtnInitialized) return;
             noBtnInitialized = true;
-            // 마우스 올릴 때 & 모바일 터치할 때 모두 작동
             btnNo.addEventListener('mouseenter', dodgeButton);
             btnNo.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // 실제 클릭 방지
+                e.preventDefault(); 
                 dodgeButton();
             }, { passive: false });
         }
@@ -340,26 +481,22 @@
         function dodgeButton() {
             noCount++;
             
-            // 버튼을 flex 구조에서 빼내어 화면 전체를 기준으로 자유롭게 날아다니게 만듦
             btnNo.style.position = 'fixed';
             btnNo.style.zIndex = '9999';
             
-            // 화면 내에서 랜덤한 위치로 이동 (버튼이 화면 밖으로 나가지 않게 여백 계산)
             const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20) + 10;
             const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20) + 10;
             
             btnNo.style.left = `${x}px`;
             btnNo.style.top = `${y}px`;
             
-            // 크기 점점 작아짐 (최소 0.5배까지)
             let scale = Math.max(1 - (noCount * 0.1), 0.5);
             btnNo.style.transform = `scale(${scale})`;
 
-            // 문구 변경
             if (noCount <= funnyMessages.length) {
                 btnNo.innerHTML = funnyMessages[noCount - 1];
             } else {
-                btnNo.innerHTML = "ㅠㅠ";
+                btnNo.innerHTML = "😭";
             }
         }
 
@@ -372,7 +509,6 @@
             startLiveCounter();
         });
 
-        // 화려한 폭죽 효과 함수 (canvas-confetti)
         function triggerConfetti() {
             const duration = 5 * 1000;
             const animationEnd = Date.now() + duration;
@@ -384,31 +520,29 @@
 
             const interval = setInterval(function() {
                 const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
+                if (timeLeft <= 0) return clearInterval(interval);
 
                 const particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount,
-                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-                }));
-                confetti(Object.assign({}, defaults, { particleCount,
-                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-                }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
         }
 
-        // --- 7. 실시간 함께한 시간 카운터 ---
-        function startLiveCounter() {
-            // 사귄 날짜: 2025년 9월 11일 자정 (현재 설정)
-            // 필요에 따라 연도를 실제 사귀기 시작한 연도로 변경하세요.
-            const startDate = new Date("2025-09-11T00:00:00").getTime();
-            const counterEl = document.getElementById('live-counter');
+        // --- 7. 실시간 함께한 시간 카운터 & 1주년 피날레 ---
+        let globalStartDate = new Date("2025-09-11T00:00:00").getTime();
+        let liveCounterInterval;
+        let megaEventTriggered = false;
 
-            setInterval(() => {
+        function startLiveCounter() {
+            const counterEl = document.getElementById('live-counter');
+            if (liveCounterInterval) clearInterval(liveCounterInterval);
+
+            const startDateObj = new Date(globalStartDate);
+            const oneYearTarget = new Date(startDateObj.getFullYear() + 1, startDateObj.getMonth(), startDateObj.getDate()).getTime();
+
+            liveCounterInterval = setInterval(() => {
                 const now = new Date().getTime();
-                const diff = now - startDate;
+                const diff = now - globalStartDate;
 
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -417,10 +551,113 @@
 
                 counterEl.innerHTML = `
                     <div class="text-sm text-pink-300 mb-1">私たちが愛し合ってから</div>
-                    <div class="font-bold text-white tracking-widest">${days}日 ${hours}時間 ${minutes}分 ${seconds}秒</div>
+                    <div class="font-bold text-white tracking-widest text-lg">${days}日 ${hours}時間 ${minutes}分 ${seconds}秒</div>
                     <div class="text-xs text-gray-400 mt-1">우리가 사랑한 지</div>
                 `;
+
+                if (now >= oneYearTarget && !megaEventTriggered) {
+                    triggerMegaAnniversary();
+                }
+
             }, 1000);
+        }
+
+        function triggerMegaAnniversary() {
+            megaEventTriggered = true; 
+            const megaEventUI = document.getElementById('mega-anniversary-event');
+            megaEventUI.classList.add('show');
+
+            const firework1 = document.getElementById('sfx-firework-1');
+            const firework2 = document.getElementById('sfx-firework-2');
+            const firework3 = document.getElementById('sfx-firework-3');
+            const bgm = document.getElementById('finale-bgm');
+
+            if(bgm) { bgm.volume = 0.6; bgm.play().catch(e => console.log("자동재생 차단됨")); }
+            
+            if(firework1) { firework1.volume = 1.0; firework1.play(); }
+            document.body.classList.add('screen-shake');
+            setTimeout(() => document.body.classList.remove('screen-shake'), 1000);
+
+            const duration = 25 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 25,
+                    startVelocity: 60,
+                    spread: 360,
+                    ticks: 100,
+                    origin: { x: Math.random(), y: Math.random() - 0.2 },
+                    colors: ['#ff0a54', '#ff477e', '#ff7096', '#ffffff', '#ffd700'],
+                    zIndex: 100000
+                });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+
+            const seq1 = document.getElementById('seq-1');
+            const seq2 = document.getElementById('seq-2');
+            const seq3 = document.getElementById('seq-3');
+            const finale = document.getElementById('finale-text');
+
+            setTimeout(() => { seq1.classList.add('active'); }, 1000);
+            setTimeout(() => { seq1.classList.remove('active'); seq1.style.opacity = '0'; }, 4500);
+
+            setTimeout(() => {
+                if(firework2) { firework2.currentTime = 0; firework2.volume = 1.0; firework2.play(); }
+                document.body.classList.add('screen-shake');
+                setTimeout(() => document.body.classList.remove('screen-shake'), 800);
+                seq2.classList.add('active');
+            }, 5500);
+            setTimeout(() => { seq2.classList.remove('active'); seq2.style.opacity = '0'; }, 9000);
+
+            setTimeout(() => {
+                if(firework1) { firework1.currentTime = 0; firework1.volume = 1.0; firework1.play(); }
+                document.body.classList.add('screen-shake');
+                setTimeout(() => document.body.classList.remove('screen-shake'), 800);
+                seq3.classList.add('active');
+            }, 10000);
+            setTimeout(() => { seq3.classList.remove('active'); seq3.style.opacity = '0'; }, 13500);
+
+            setTimeout(() => {
+                if(firework3) { firework3.volume = 1.0; firework3.currentTime = 0; firework3.play(); }
+                document.body.classList.add('screen-shake');
+                setTimeout(() => document.body.classList.remove('screen-shake'), 2000);
+
+                finale.classList.add('active');
+
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.innerHTML = ['❤️', '💖', '💘', '🎇', '🎉'][Math.floor(Math.random() * 5)];
+                        heart.classList.add('mega-heart');
+                        heart.style.left = '50%';
+                        heart.style.top = '50%';
+                        
+                        const tx = (Math.random() - 0.5) * 300 + 'vw';
+                        const ty = (Math.random() - 0.5) * 300 + 'vh';
+                        const rot = (Math.random() - 0.5) * 1080 + 'deg';
+                        
+                        heart.style.setProperty('--tx', tx);
+                        heart.style.setProperty('--ty', ty);
+                        heart.style.setProperty('--rot', rot);
+                        
+                        heart.style.fontSize = (Math.random() * 15 + 10) + 'rem';
+                        heart.style.animationDuration = (Math.random() * 1.5 + 0.5) + 's';
+                        
+                        megaEventUI.appendChild(heart);
+                        setTimeout(() => heart.remove(), 2500);
+                    }, i * 50); 
+                }
+            }, 15000);
+
+            setTimeout(() => {
+                megaEventUI.style.transition = "opacity 3s ease";
+                megaEventUI.style.opacity = "0";
+                setTimeout(() => {
+                    megaEventUI.classList.remove('show');
+                    megaEventUI.style.opacity = "1"; 
+                }, 3000);
+            }, 30000);
         }
 
         // --- 8. 모달 제어 및 캡쳐(저장) 기능 ---
@@ -431,7 +668,6 @@
 
         btnHiddenVideo.addEventListener('click', () => {
             videoModal.classList.add('show');
-            // 모달 열 때 상단으로 스크롤 강제 이동 (잘림 방지)
             videoModal.scrollTop = 0;
         });
 
@@ -439,34 +675,26 @@
             videoModal.classList.remove('show');
         });
 
-        // 캡쳐 버튼 로직
         captureBtn.addEventListener('click', () => {
             const captureArea = document.getElementById('capture-area');
-            
-            // 모바일 사파리 등에서 스크롤로 인한 캡쳐 오류를 방지하기 위해 최상단으로 강제 스크롤
             videoModal.scrollTop = 0;
             
-            // 시각적 피드백
             const originalText = captureBtn.innerHTML;
             captureBtn.innerHTML = "⏳ 保存中... (저장중...)";
             captureBtn.disabled = true;
 
             html2canvas(captureArea, {
-                scale: 2, // 고해상도 저장
-                backgroundColor: null, // 투명 배경 허용
+                scale: 2, 
+                backgroundColor: null, 
                 logging: false,
                 useCORS: true
             }).then(canvas => {
-                // 캔버스를 이미지 URL로 변환
                 const image = canvas.toDataURL("image/png");
-                
-                // 다운로드 링크 생성
                 const link = document.createElement('a');
                 link.href = image;
                 link.download = 'Letter_to_Mizuha.png';
                 link.click();
 
-                // 버튼 원상복구
                 captureBtn.innerHTML = "✅ 保存完了! (저장완료!)";
                 setTimeout(() => {
                     captureBtn.innerHTML = originalText;
@@ -482,6 +710,12 @@
         // --- 9. 디버깅 모드 (개발자/테스트용) ---
         let debugMode = false;
         let keyBuffer = "";
+        const debugMenu = document.getElementById('debug-menu');
+        const closeDebugBtn = document.getElementById('close-debug');
+
+        closeDebugBtn.addEventListener('click', () => {
+            debugMenu.classList.add('hidden');
+        });
 
         function showToast(msg) {
             const toast = document.getElementById('debug-toast');
@@ -490,28 +724,72 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
+        function forceShowScreen(screenId) {
+            letterTimeouts.forEach(t => clearTimeout(t));
+            letterTimeouts = [];
+            letterContent.classList.remove('show');
+            
+            showScreen(screenId);
+            
+            if (screenId === 'proposal-screen') {
+                initNoButton();
+            } else if (screenId === 'success-screen') {
+                startLiveCounter();
+            }
+            showToast(screenId + " (으)로 이동됨");
+        }
+
+        function updateGlobalDate() {
+            const inputDate = document.getElementById('debug-date').value;
+            const newDate = new Date(inputDate + "T00:00:00");
+            if (!isNaN(newDate.getTime())) {
+                globalStartDate = newDate.getTime();
+                megaEventTriggered = false; 
+                showToast("기념일이 " + inputDate + " 로 변경됨!");
+                if (document.getElementById('success-screen').classList.contains('active')) {
+                    startLiveCounter();
+                }
+            } else {
+                showToast("잘못된 날짜 형식입니다!");
+            }
+        }
+
+        function setAlmostOneYear() {
+            const now = new Date();
+            const almostOneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds() + 5);
+            
+            globalStartDate = almostOneYearAgo.getTime();
+            megaEventTriggered = false;
+            
+            const yyyy = almostOneYearAgo.getFullYear();
+            const mm = String(almostOneYearAgo.getMonth() + 1).padStart(2, '0');
+            const dd = String(almostOneYearAgo.getDate()).padStart(2, '0');
+            document.getElementById('debug-date').value = `${yyyy}-${mm}-${dd}`;
+            
+            showToast("⏰ 1주년 달성 5초 전으로 세팅완료!");
+            forceShowScreen('success-screen');
+        }
+
+        function resetNoButton() {
+            noCount = 0;
+            btnNo.style.position = 'static';
+            btnNo.style.transform = 'none';
+            btnNo.innerHTML = "いいえ (아니요)";
+            showToast("NO 버튼이 원위치로 복구됨!");
+        }
+
         function skipToNextScene() {
             const activeScreen = document.querySelector('.screen.active');
             
             if (activeScreen.id === 'intro-screen') {
-                document.getElementById('password').value = '0911';
-                document.getElementById('btn-enter').click();
-                showToast("편지 화면으로 스킵");
+                forceShowScreen('letter-screen');
+                startLetterAnimation();
             } 
             else if (activeScreen.id === 'letter-screen') {
-                // 진행 중인 편지 애니메이션 타이머 모두 취소
-                letterTimeouts.forEach(t => clearTimeout(t));
-                letterTimeouts = [];
-                letterContent.classList.remove('show');
-                
-                // 프러포즈 화면으로 강제 이동
-                showScreen('proposal-screen');
-                initNoButton();
-                showToast("프러포즈 화면으로 스킵");
+                forceShowScreen('proposal-screen');
             } 
             else if (activeScreen.id === 'proposal-screen') {
-                document.getElementById('btn-yes').click();
-                showToast("성공 화면으로 스킵");
+                forceShowScreen('success-screen');
             } 
             else if (activeScreen.id === 'success-screen') {
                 const videoModal = document.getElementById('video-modal');
@@ -525,10 +803,13 @@
             }
         }
 
-        // 키보드 입력 감지 로직
         window.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT' && document.activeElement.id === 'debug-date') {
+                return;
+            }
+
             if (debugMode && e.code === 'Space') {
-                e.preventDefault(); // 스페이스바로 인한 스크롤 방지
+                e.preventDefault(); 
                 skipToNextScene();
                 return;
             }
@@ -539,7 +820,6 @@
             }
         });
 
-        // 한글 조합(IME) 완료 감지
         window.addEventListener('compositionend', (e) => {
             if (e.data) {
                 keyBuffer += e.data;
@@ -556,11 +836,17 @@
                 keyBuffer = keyBuffer.slice(-30);
             }
             
-            // 한글 '디버깅' 또는 영어(QWERTY)로 쳤을 때의 'elqjrld' 감지
-            if (!debugMode && (keyBuffer.includes("디버깅") || keyBuffer.includes("elqjrld"))) {
+            if (keyBuffer.includes("디버깅") || keyBuffer.includes("elqjrld")) {
                 debugMode = true;
-                keyBuffer = "";
-                showToast("🛠 디버깅 모드 ON! (스페이스바로 화면 스킵)");
+                keyBuffer = ""; 
+                
+                if (debugMenu.classList.contains('hidden')) {
+                    debugMenu.classList.remove('hidden');
+                    showToast("🛠 관리자 메뉴 오픈!");
+                } else {
+                    debugMenu.classList.add('hidden');
+                    showToast("🛠 관리자 메뉴 닫힘");
+                }
             }
         }
 
