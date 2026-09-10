@@ -1,853 +1,1020 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>1st Anniversary & Proposal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            overflow-x: hidden;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #ffe4e1; /* 연한 핑크 배경 */
+            margin: 0;
+            overflow: hidden; /* 스크롤 방지 */
+            height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .heart-bg {
-            position: absolute;
-            top: -10vh;
-            color: rgba(255, 105, 180, 0.3);
-            font-size: 2rem;
-            animation: fall linear infinite;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-        }
-
-        .fade-text {
-            opacity: 0;
-            transition: opacity 1.5s ease-in-out;
-        }
-        .fade-text.show {
-            opacity: 1;
-        }
-
-        .text-glow {
-            text-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
-        }
-
+        .font-jp { font-family: 'Noto Serif JP', serif; }
+        
         .screen {
             display: none;
             width: 100%;
-            min-height: 100dvh;
+            height: 100%;
             position: absolute;
-            inset: 0;
+            top: 0;
+            left: 0;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem;
         }
         .screen.active {
             display: flex;
         }
 
-        #btn-no {
-            transition: all 0.2s ease;
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes floatUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); color: #ff0000; } 100% { transform: scale(1); } }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        @keyframes textPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; filter: brightness(2); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        #video-modal {
-            display: none;
-        }
-        #video-modal.show {
-            display: flex;
-            opacity: 1;
+        @keyframes flashBackground {
+            0% { background: #000000; }
+            25% { background: #3a001e; }
+            50% { background: #1a0033; }
+            75% { background: #330000; }
+            100% { background: #000000; }
         }
 
-        #debug-toast {
+        @keyframes bigFlash {
+            0% { background-color: white; opacity: 1; z-index: 999999; }
+            100% { background-color: transparent; opacity: 0; z-index: -1; }
+        }
+
+        .big-flash-overlay {
             position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: #00ff00;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 99999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s;
+            z-index: -1;
         }
-        #debug-toast.show {
-            opacity: 1;
+        .big-flash-overlay.active {
+            animation: bigFlash 1s ease-out forwards;
+        }
+
+        .fade-in { animation: fadeIn 1.5s ease-in-out forwards; }
+        .float-up { animation: floatUp 1s ease-out forwards; }
+        .heartbeat { animation: heartbeat 1s infinite; }
+        .shake-screen { animation: shake 0.5s infinite; }
+
+        .falling-element {
+            position: absolute;
+            top: -10vh;
+            z-index: 10;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
         }
 
         #mega-anniversary-event {
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 99999;
+            z-index: 99999; /* 최상단 */
             pointer-events: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%);
+            background: #000000; /* 완전 암전 */
+            overflow: hidden;
         }
-        #mega-anniversary-event.show {
+        #mega-anniversary-event.active {
             display: flex;
         }
 
-        .firework-text-glow {
-            text-align: center;
+        .cinematic-text {
+            position: absolute;
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff69b4;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.5s ease;
+        }
+        .cinematic-text.show {
+            animation: textPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        
+        .huge-finale-text {
+            position: absolute;
+            font-size: 15vw; /* 화면 꽉 차게 */
             font-weight: 900;
-            line-height: 1.3;
             color: #fff;
-            text-shadow: 
-                0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0055, 
-                0 0 40px #ff0055, 0 0 60px #ff0055, 0 0 80px #ff0055, 0 0 100px #ff0055;
-            animation: explodeText 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseGlow 2s infinite alternate 1.5s;
-        }
-
-        @keyframes explodeText {
-            0% { transform: scale(0); opacity: 0; filter: brightness(3); }
-            60% { transform: scale(1.1); opacity: 1; filter: brightness(2); }
-            100% { transform: scale(1); opacity: 1; filter: brightness(1); }
-        }
-
-        @keyframes pulseGlow {
-            0% { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0055, 0 0 40px #ff0055, 0 0 60px #ff0055; transform: scale(1); }
-            100% { text-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 50px #ff0055, 0 0 70px #ff0055, 0 0 100px #ff0055, 0 0 120px #ff0055; transform: scale(1.05); }
-        }
-
-        .screen-shake {
-            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) infinite;
-        }
-
-        @keyframes shake {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-15px, 15px) rotate(-2deg); }
-            40% { transform: translate(15px, -15px) rotate(2deg); }
-            60% { transform: translate(-15px, -15px) rotate(-2deg); }
-            80% { transform: translate(15px, 15px) rotate(2deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-
-        .romantic-seq {
-            position: absolute;
             text-align: center;
+            line-height: 1.2;
+            text-shadow: 0 0 30px #ff1493, 0 0 60px #ff0000, 0 0 100px #ff1493;
             opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 1.5s ease, transform 3s ease-out;
-            pointer-events: none;
-            width: 100%;
-        }
-        .romantic-seq.active {
-            opacity: 1;
-            transform: scale(1.2);
+            z-index: 100;
+            white-space: nowrap;
         }
 
-        #finale-text {
-            opacity: 0;
-            transform: scale(0.1);
-        }
-        #finale-text.active {
-            animation: explodeText 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, pulseGlow 2s infinite alternate 1.5s;
-        }
-
-        .mega-heart {
+        .popping-word {
             position: absolute;
-            font-size: 5rem;
-            animation: shootHeart linear forwards;
-            z-index: 99998;
+            font-size: clamp(1.5rem, 6vw, 4rem);
+            font-weight: 900;
+            color: #fff;
+            z-index: 110;
+            pointer-events: none;
+            white-space: nowrap;
+            text-align: center;
+        }
+        
+        @keyframes fireworkText {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
+            15% { transform: translate(-50%, -50%) scale(1.4) rotate(10deg); opacity: 1; filter: brightness(2); }
+            30% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+            80% { transform: translate(-50%, -70%) scale(1); opacity: 1; filter: blur(0px); }
+            100% { transform: translate(-50%, -120%) scale(2); opacity: 0; filter: blur(10px); }
         }
 
-        @keyframes shootHeart {
-            0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(2) rotate(var(--rot)); opacity: 0; }
+        #debug-menu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 50, 0, 0.9);
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100000;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 0 15px #0f0;
+        }
+        #debug-menu.active { display: flex; }
+        .debug-btn {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        .debug-btn:hover { background: #cfc; }
+        
+        #modal-content {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe4e1 100%);
+            max-height: 80vh;
+            overflow-y: auto;
         }
     </style>
 </head>
-<body class="w-full min-h-[100dvh] flex flex-col items-center justify-center relative bg-fixed">
+<body>
 
-    <!-- 오류 원인이었던 배경 이모지가 담길 컨테이너 추가 -->
-    <div id="particles" class="fixed inset-0 pointer-events-none z-0"></div>
-
-    <!-- 화려한 폭죽 효과음 및 감동적인 BGM -->
-    <audio id="sfx-firework-1" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_03d9bd7780.mp3?filename=fireworks-1-84080.mp3" preload="auto"></audio>
-    <audio id="sfx-firework-2" src="https://cdn.pixabay.com/download/audio/2021/09/06/audio_24e9cbdbbb.mp3?filename=fireworks-2-45239.mp3" preload="auto"></audio>
-    <audio id="sfx-firework-3" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_03d9bd7780.mp3?filename=fireworks-1-84080.mp3" preload="auto"></audio>
-    <audio id="finale-bgm" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=epic-cinematic-trailer-113902.mp3" preload="auto"></audio>
-
-    <div id="debug-toast"></div>
-
-    <div id="debug-menu" class="hidden fixed top-4 right-4 bg-gray-900/95 text-green-400 p-5 rounded-2xl border border-green-500 z-[99999] shadow-[0_0_20px_rgba(0,255,0,0.2)] flex flex-col gap-4 w-72 backdrop-blur-sm transition-all duration-300">
-        <div class="flex justify-between items-center border-b border-green-800 pb-2">
-            <h3 class="font-bold text-lg flex items-center gap-2">🛠️ Debug Menu</h3>
-            <button id="close-debug" class="text-red-400 hover:text-red-300 font-bold text-xl px-2">×</button>
-        </div>
-        
-        <div class="space-y-2">
-            <p class="text-xs text-gray-400 font-bold">📍 화면 스킵 및 강제 이동</p>
-            <div class="grid grid-cols-2 gap-2">
-                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('intro-screen')">1. 시작</button>
-                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('letter-screen')">2. 편지</button>
-                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('proposal-screen')">3. 프러포즈</button>
-                <button class="bg-gray-800 hover:bg-gray-700 py-1.5 rounded text-sm transition" onclick="forceShowScreen('success-screen')">4. 성공</button>
-            </div>
-        </div>
-
-        <div class="space-y-2 pt-2 border-t border-green-900">
-            <p class="text-xs text-gray-400 font-bold">⚙️ 상태 조작</p>
-            <button class="bg-gray-800 hover:bg-gray-700 py-2 w-full rounded text-sm transition mb-2" onclick="triggerConfetti()">🎉 폭죽 강제 발사</button>
-            <button class="bg-gray-800 hover:bg-gray-700 py-2 w-full rounded text-sm transition mb-2" onclick="resetNoButton()">🔄 도망간 NO버튼 원위치</button>
-            
-            <button class="bg-pink-800 hover:bg-pink-700 text-white font-bold py-2 w-full rounded text-sm transition mb-2 animate-pulse" onclick="setAlmostOneYear()">⏰ 1주년 5초 전으로 세팅 (테스트)</button>
-
-            <div class="flex flex-col gap-1 mt-2">
-                <label class="text-xs text-gray-400">사귄 날짜 (카운터 조작용)</label>
-                <div class="flex gap-2">
-                    <input type="text" id="debug-date" value="2025-09-11" class="bg-gray-900 border border-gray-600 text-green-300 text-sm px-2 py-1 rounded w-full outline-none focus:border-green-500" placeholder="YYYY-MM-DD">
-                    <button class="bg-green-800 hover:bg-green-700 text-white py-1 px-3 rounded text-sm whitespace-nowrap transition" onclick="updateGlobalDate()">적용</button>
-                </div>
-            </div>
-        </div>
+    <div id="start-screen" class="screen active bg-pink-100">
+        <h1 class="text-3xl font-bold text-pink-600 mb-8 font-jp">みずは様への<br>特別なご案内</h1>
+        <p class="text-gray-600 mb-8">소리가 재생될 수 있으니 볼륨을 확인해 주세요.</p>
+        <button onclick="initApp()" class="bg-pink-500 text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg shadow-pink-300 hover:bg-pink-600 transition transform hover:scale-105">
+            이벤트 시작 (開始)
+        </button>
     </div>
+
+    <div id="intro-countdown-screen" class="screen bg-gradient-to-br from-pink-300 to-purple-400">
+        <h2 class="text-2xl font-bold text-white mb-4 drop-shadow-md">私たちの1周年まで</h2>
+        <p class="text-sm text-pink-100 mb-8 drop-shadow-md">우리의 1주년까지 남은 시간</p>
+        
+        <div class="flex gap-4 text-white drop-shadow-xl text-center">
+            <div class="flex flex-col bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
+                <span id="cd-days" class="text-5xl font-black">00</span>
+                <span class="text-sm mt-1">日 (일)</span>
+            </div>
+            <div class="flex flex-col bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
+                <span id="cd-hours" class="text-5xl font-black">00</span>
+                <span class="text-sm mt-1">時間 (시간)</span>
+            </div>
+            <div class="flex flex-col bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
+                <span id="cd-mins" class="text-5xl font-black">00</span>
+                <span class="text-sm mt-1">分 (분)</span>
+            </div>
+            <div class="flex flex-col bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
+                <span id="cd-secs" class="text-5xl font-black">00</span>
+                <span class="text-sm mt-1">秒 (초)</span>
+            </div>
+        </div>
+        <p class="mt-12 text-white/80 font-bold animate-pulse">11시 30분부터 대기 시작...</p>
+    </div>
+
+    <div id="sixty-sec-countdown" class="screen bg-black">
+        <h2 class="text-white text-3xl mb-8 font-bold text-shadow-lg">まもなく... (곧...)</h2>
+        <div id="sixty-sec-text" class="text-[12rem] font-black text-red-500 heartbeat">60</div>
+    </div>
+
+    <div class="big-flash-overlay" id="big-flash"></div>
 
     <div id="mega-anniversary-event">
-        <div id="seq-1" class="romantic-seq">
-            <span class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">私たちが初めて会ったあの日から...</span><br>
-            <span class="text-2xl md:text-3xl font-bold text-pink-300 drop-shadow-[0_0_15px_rgba(255,105,180,0.8)] mt-2 block">우리가 처음 만난 그 날부터...</span>
-        </div>
-
-        <div id="seq-2" class="romantic-seq">
-            <span class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">君と一緒に過ごしたすべての時間が...</span><br>
-            <span class="text-2xl md:text-3xl font-bold text-pink-300 drop-shadow-[0_0_15px_rgba(255,105,180,0.8)] mt-2 block">너와 함께한 모든 시간이...</span>
-        </div>
-
-        <div id="seq-3" class="romantic-seq">
-            <span class="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">僕にとって一番の奇跡だったよ。</span><br>
-            <span class="text-2xl md:text-3xl font-bold text-pink-300 drop-shadow-[0_0_15px_rgba(255,105,180,0.8)] mt-2 block">나에게 가장 큰 기적이었어.</span>
-        </div>
-
-        <div id="finale-text" class="firework-text-glow flex flex-col gap-4 px-4 w-full">
-            <span class="text-6xl md:text-8xl">これからも<br>よろしくね！</span>
-            <span class="text-5xl md:text-7xl text-pink-300">앞으로 잘 부탁해<br>사랑해 ❤️</span>
+        <div id="cinematic-1" class="cinematic-text">みずは、</div>
+        <div id="cinematic-2" class="cinematic-text">私たちの1周年</div>
+        <div id="cinematic-3" class="cinematic-text">本当にありがとう</div>
+        
+        <div id="huge-finale" class="huge-finale-text flex flex-col items-center">
+            <span>앞으로</span>
+            <span>잘 부탁해</span>
+            <span class="text-red-500 text-[18vw] mt-4">사랑해!!</span>
         </div>
     </div>
 
-    <div id="intro-screen" class="screen active z-10">
-        <div class="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-[0_0_20px_rgba(255,105,180,0.3)] text-center w-11/12 max-w-sm">
-            <h1 class="text-2xl font-bold mb-2 text-pink-300">私たちの記念日</h1>
-            <p class="text-sm text-gray-300 mb-6">우리의 기념일</p>
-            <div class="mb-6">
-                <input type="password" id="password" placeholder="MMDD" maxlength="4" class="w-full text-center text-2xl tracking-widest p-3 rounded-lg bg-black/30 border border-pink-400 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 transition">
-            </div>
-            <button id="btn-enter" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 active:scale-95">
-                開ける (열기)
-            </button>
-            <p id="error-msg" class="text-red-400 text-sm mt-4 hidden">パスワードが違います。(비밀번호가 틀렸습니다.)</p>
-        </div>
-    </div>
-
-    <div id="letter-screen" class="screen z-10">
-        <div class="text-center w-11/12 max-w-2xl px-4 py-8">
-            <div id="letter-content" class="fade-text text-2xl md:text-4xl font-bold leading-relaxed text-glow">
-                <!-- 편지 내용이 여기에 들어갑니다 -->
-            </div>
-        </div>
-    </div>
-
-    <div id="proposal-screen" class="screen z-10">
-        <div class="text-center bg-black/40 p-8 rounded-3xl backdrop-blur-md border border-pink-500/30 w-11/12 max-w-md">
-            <h2 class="text-3xl md:text-4xl font-bold mb-2 text-pink-300 text-glow">僕と結婚してくれませんか？</h2>
-            <p class="text-lg text-gray-300 mb-10">나와 결혼해 줄래?</p>
+    <div id="password-screen" class="screen bg-pink-50">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full float-up">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2 font-jp">パスワード</h2>
+            <p class="text-sm text-gray-500 mb-6">우리가 처음 사귄 날짜 4자리를 입력해주세요.</p>
             
-            <!-- 버튼들을 가로로 나란히 배치하기 위한 flex 컨테이너 -->
-            <div class="flex justify-center gap-6 relative min-h-[60px]">
-                <button id="btn-yes" class="bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-110 active:scale-95 text-lg z-20">
+            <div class="flex justify-center gap-3 mb-8">
+                <input type="password" maxlength="1" class="pwd-input w-14 h-16 text-center text-3xl font-bold border-b-4 border-pink-300 focus:border-pink-500 focus:outline-none bg-transparent transition-colors" data-index="0">
+                <input type="password" maxlength="1" class="pwd-input w-14 h-16 text-center text-3xl font-bold border-b-4 border-pink-300 focus:border-pink-500 focus:outline-none bg-transparent transition-colors" data-index="1">
+                <input type="password" maxlength="1" class="pwd-input w-14 h-16 text-center text-3xl font-bold border-b-4 border-pink-300 focus:border-pink-500 focus:outline-none bg-transparent transition-colors" data-index="2">
+                <input type="password" maxlength="1" class="pwd-input w-14 h-16 text-center text-3xl font-bold border-b-4 border-pink-300 focus:border-pink-500 focus:outline-none bg-transparent transition-colors" data-index="3">
+            </div>
+            
+            <p id="pwd-error" class="text-red-500 text-sm font-bold mb-4 opacity-0 transition-opacity">날짜가 틀렸습니다. 다시 생각해 보세요! 🤔</p>
+            <button onclick="checkPassword()" class="w-full bg-pink-400 hover:bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md transition-colors">열기 (開く)</button>
+        </div>
+    </div>
+
+    <div id="letter-screen" class="screen bg-gray-900 relative">
+        <div id="falling-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+        <div id="letter-content" class="z-10 w-full max-w-md px-4 h-full flex items-center justify-center relative">
+            <!-- 편지 문장이 JS로 이곳에 주입됩니다 -->
+        </div>
+    </div>
+
+    <div id="propose-screen" class="screen bg-pink-100 relative">
+        <div id="falling-container-2" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+        <div class="z-10 flex flex-col items-center justify-center h-full w-full max-w-md">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4 font-jp leading-tight">僕と結婚して<br>くれますか？</h1>
+            <p class="text-xl text-gray-600 mb-12 font-bold">나와 결혼해 줄래?</p>
+            
+            <div class="flex gap-6 relative w-full justify-center h-32 items-center">
+                <button onclick="acceptProposal()" class="bg-pink-500 text-white font-bold text-2xl py-4 px-10 rounded-full shadow-xl hover:bg-pink-600 transform hover:scale-110 transition-all z-20">
                     はい (네)
                 </button>
-                <button id="btn-no" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg z-20 whitespace-nowrap">
+                <button id="no-btn" class="bg-gray-400 text-white font-bold text-2xl py-4 px-10 rounded-full shadow-lg absolute transition-all duration-200 z-20" style="right: calc(50% - 140px);">
                     いいえ (아니요)
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="success-screen" class="screen z-10 flex flex-col items-center justify-center p-4 py-12">
-        <div class="text-center bg-white/10 p-8 rounded-3xl backdrop-blur-md border border-pink-500/50 shadow-[0_0_30px_rgba(255,105,180,0.5)] w-11/12 max-w-md flex flex-col items-center mb-8">
-            <div class="text-6xl mb-4 animate-bounce">💍</div>
-            <h2 class="text-3xl md:text-4xl font-bold mb-2 text-pink-300 text-glow">ありがとう！愛してるよ。</h2>
-            <p class="text-lg text-gray-300 mb-8">고마워! 사랑해.</p>
-            
-            <div class="w-full bg-black/40 rounded-2xl p-4 mb-4 border border-pink-900/50" id="live-counter">
-                <!-- 라이브 카운터가 여기에 들어갑니다 -->
-            </div>
-        </div>
+    <div id="success-screen" class="screen bg-white">
+        <h1 class="text-5xl mb-6">💍</h1>
+        <h2 class="text-3xl font-bold text-pink-600 mb-2 font-jp">愛してるよ、みずは！</h2>
+        <p class="text-lg text-gray-700 mb-8 font-bold">사랑해, 미즈하!</p>
         
-        <button id="btn-hidden-video" class="mt-4 flex flex-col items-center gap-2 group cursor-pointer transition transform hover:scale-110 z-20">
-            <div class="text-4xl group-hover:animate-spin">🎁</div>
-            <span class="text-sm font-bold text-pink-300 bg-black/50 px-3 py-1 rounded-full border border-pink-500/30">プレゼント (선물)</span>
+        <div class="bg-pink-50 p-6 rounded-2xl shadow-inner mb-10 w-full max-w-xs">
+            <p class="text-sm text-gray-500 mb-2">私たちが愛し合ってから</p>
+            <p class="text-xs text-gray-400 mb-2">(우리가 사랑한 지)</p>
+            <div id="love-timer" class="text-xl font-black text-pink-500">계산 중...</div>
+        </div>
+
+        <button onclick="openModal()" class="animate-bounce bg-yellow-400 text-yellow-900 font-bold py-3 px-8 rounded-full shadow-lg flex items-center gap-2">
+            <span>🎁</span> 선물 (プレゼント)
         </button>
     </div>
 
-    <div id="video-modal" class="fixed inset-0 bg-black/80 z-[100] items-center justify-center p-4 overflow-y-auto">
-        <div class="w-full max-w-md my-8 flex flex-col items-center relative">
-            
-            <!-- 캡쳐될 영역 시작 -->
-            <div id="capture-area" class="w-full bg-[#fdfbf7] rounded-xl shadow-2xl overflow-hidden relative">
-                <!-- 편지지 배경 장식 -->
-                <div class="absolute top-0 left-0 w-full h-12 bg-pink-100 border-b-2 border-pink-200"></div>
-                <div class="absolute top-0 right-0 w-16 h-16 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffb6c1%22><path d=%22M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z%22/></svg>')] opacity-20 transform translate-x-2 -translate-y-2"></div>
-                
-                <div class="px-6 py-10 pt-16 text-gray-800">
-                    <h3 class="text-2xl font-bold text-pink-600 mb-6 font-serif border-b border-pink-200 pb-2">みずは様へ (미즈하님께)</h3>
-                    
-                    <div class="space-y-6 text-[15px] leading-relaxed">
-                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
-                            <p class="font-bold text-gray-900 mb-1">一生僕と一緒にいると約束してくれて、本当にありがとう。</p>
-                            <p class="text-sm text-gray-500">평생 나와 함께 하기로 약속해줘서 정말 고마워.</p>
-                        </div>
-
-                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
-                            <p class="font-bold text-gray-900 mb-1">僕のすべてであるあなたを、これから一生かけて守り抜きます。</p>
-                            <p class="text-sm text-gray-500">나의 모든 것인 당신을, 앞으로 평생을 걸쳐 지켜낼게.</p>
-                        </div>
-
-                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
-                            <p class="font-bold text-gray-900 mb-1">どんな困難があっても、あなたと一緒ならすべて乗り越えられると信じています。</p>
-                            <p class="text-sm text-gray-500">어떤 어려움이 있어도, 당신과 함께라면 모두 이겨낼 수 있다고 믿어.</p>
-                        </div>
-                        
-                        <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
-                            <p class="font-bold text-gray-900 mb-1">世界で一番美しい私の花嫁、これからもずっとよろしくね。</p>
-                            <p class="text-sm text-gray-500">세상에서 가장 아름다운 나의 신부, 앞으로도 영원히 잘 부탁해.</p>
-                        </div>
-
-                        <div class="text-right pt-6 mt-4 border-t border-pink-200 font-serif">
-                            <p class="text-lg font-bold text-pink-600 mb-1">あなたを永遠に愛するドンちゃんより</p>
-                            <p class="text-sm text-gray-400">당신을 영원히 사랑하는 동짱이</p>
-                        </div>
-                    </div>
+    <div id="modal-screen" class="fixed inset-0 bg-black/60 z-[9999] hidden flex-col justify-center items-center p-4">
+        <div id="capture-area" class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden relative">
+            <div id="modal-content" class="p-8 text-center">
+                <h2 class="text-2xl font-bold text-pink-600 mb-6 font-jp border-b-2 border-pink-200 pb-4">愛するみずはへ</h2>
+                <div class="text-left text-gray-700 space-y-6 leading-relaxed font-jp text-sm sm:text-base">
+                    <p>一生僕と一緒にいると約束してくれて、本当にありがとう。<br><span class="text-xs text-gray-400 font-sans block mt-1">(평생 나와 함께 하기로 약속해줘서 정말 고마워.)</span></p>
+                    <p>あなたと出会ってからの1年は、僕の人生で一番幸せな時間でした。<br><span class="text-xs text-gray-400 font-sans block mt-1">(당신과 만난 이후의 1년은, 내 인생에서 가장 행복한 시간이었습니다.)</span></p>
+                    <p>足りない僕をいつも信じてくれて、優しく教えてくれてありがとう。<br><span class="text-xs text-gray-400 font-sans block mt-1">(부족한 나를 항상 믿어주고, 다정하게 가르쳐줘서 고마워.)</span></p>
+                    <p>これからは僕があなたを世界で一番幸せにします。<br><span class="text-xs text-gray-400 font-sans block mt-1">(앞으로는 내가 당신을 세상에서 가장 행복하게 해줄게.)</span></p>
+                    <p>おじいちゃん、おばあちゃんになっても、ずっと手をつないで歩こうね。<br><span class="text-xs text-gray-400 font-sans block mt-1">(할아버지, 할머니가 되어서도 계속 손잡고 걷자.)</span></p>
+                    <p class="text-right font-bold text-pink-600 mt-8 text-lg">
+                        あなたを永遠に愛するドンちゃんより<br>
+                        <span class="text-xs text-gray-400 font-sans font-normal">(당신을 영원히 사랑하는 동짱이)</span>
+                    </p>
                 </div>
             </div>
-            <!-- 캡쳐될 영역 끝 -->
-
-            <!-- 캡쳐 및 닫기 버튼 (캡쳐 시 안보임) -->
-            <div class="flex flex-col gap-3 w-full mt-6">
-                <button id="capture-btn" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center justify-center gap-2 transition active:scale-95">
-                    <span>📸</span> 画像として保存 (이미지로 간직하기)
+            
+            <div id="modal-buttons" class="p-4 bg-gray-50 flex flex-col sm:flex-row gap-3 border-t border-gray-100">
+                <button onclick="captureLetter()" class="flex-1 bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600 transition shadow">
+                    📸 이미지로 간직하기 (画像として保存)
                 </button>
-                <button id="close-modal" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition active:scale-95">
-                    閉じる (닫기)
+                <button onclick="closeModal()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition">
+                    닫기 (閉じる)
                 </button>
             </div>
+        </div>
+    </div>
+
+    <div id="debug-menu">
+        <div class="flex justify-between items-center border-b border-green-500 pb-2 mb-2">
+            <span class="font-bold text-lg">🛠 관리자 메뉴</span>
+            <button onclick="toggleDebugMenu()" class="text-red-500 font-bold">X</button>
+        </div>
+        <p class="mb-2 text-gray-300">화면 강제 이동:</p>
+        <button class="debug-btn" onclick="jumpToScreen('password-screen')">1. 비밀번호 화면</button>
+        <button class="debug-btn" onclick="jumpToScreen('propose-screen')">2. 프러포즈 화면</button>
+        <button class="debug-btn" onclick="jumpToScreen('success-screen')">3. 최종 성공 화면</button>
+        <hr class="border-green-800 my-1">
+        <p class="mb-2 text-gray-300">특수 기능:</p>
+        <button class="debug-btn bg-purple-500 text-white border-none" onclick="triggerMegaEventTimerTest()">[⏰ 65초 전으로 세팅]</button>
+        <button class="debug-btn bg-pink-500 text-white border-none" onclick="triggerMegaEventCountdownTest()">[⏰ 1주년 5초 전으로 세팅 (스페셜)]</button>
+        <button class="debug-btn" onclick="testFirework()">🎉 폭죽 테스트</button>
+        <button class="debug-btn" onclick="resetNoButton()">🧲 NO 버튼 원위치</button>
+        <hr class="border-green-800 my-1">
+        <div class="flex flex-col gap-1">
+            <label>사귄 날짜 조작 (타이머용)</label>
+            <input type="datetime-local" id="debug-date" class="text-black p-1">
+            <button class="debug-btn" onclick="applyDebugDate()">적용</button>
         </div>
     </div>
 
     <script>
-        // --- 1. 배경 이모지 생성 함수 ---
-        function createFallingEmoji() {
-            // particles 요소가 있는지 먼저 확인
-            const particlesContainer = document.getElementById('particles');
-            if (!particlesContainer) return; 
+        // --- 상태 및 변수 ---
+        let audioCtx;
+        let isAudioUnlocked = false;
+        
+        let firstDay = new Date('2025-09-11T00:00:00'); // 기본 사귄 날짜
+        let targetDate = new Date(firstDay.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1주년 (365일 뒤)
+        
+        let introTimerInterval = null;
+        let lastBeepTime = 0;
+        
+        // 치트키용
+        let keyBuffer = "";
+        const cheatCodes = ["디버깅", "elqjrld"];
 
-            const emojiEl = document.createElement('div');
-            emojiEl.classList.add('heart-bg');
+        // --- 1. 초기화 및 오디오 락 해제 ---
+        function initApp() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                // 꼼수로 무음 재생하여 락 해제
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = 440;
+                osc.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.001);
+                isAudioUnlocked = true;
+            } catch (e) {
+                console.log("Web Audio API not supported");
+            }
             
-            const emojis = ['🌸', '✨', '🌷', '💍', '💌', '💖', '🥰', '🥂', '❤️'];
-            emojiEl.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
-            
-            emojiEl.style.left = Math.random() * 100 + 'vw';
-            emojiEl.style.animationDuration = (Math.random() * 5 + 5) + 's';
-            emojiEl.style.opacity = Math.random() * 0.5 + 0.3;
-            emojiEl.style.fontSize = (Math.random() * 2 + 1) + 'rem';
-            
-            particlesContainer.appendChild(emojiEl);
-
-            setTimeout(() => {
-                if (emojiEl.parentNode) {
-                    emojiEl.remove();
-                }
-            }, 10000);
+            showScreen('intro-countdown-screen');
+            startIntroCountdown();
         }
-        setInterval(createFallingEmoji, 300);
 
-        // --- 2. 화면 전환 함수 ---
+        // --- 2. 뷰 제어 헬퍼 ---
         function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            if(target) target.classList.add('active');
         }
 
-        // --- 3. 비밀번호 검증 (0911) ---
-        const btnEnter = document.getElementById('btn-enter');
-        const passwordInput = document.getElementById('password');
-        const errorMsg = document.getElementById('error-msg');
+        // --- STREAMING_CHUNK:Audio Generators ---
+        function playBeep() {
+            if (!isAudioUnlocked || !audioCtx) return;
+            const now = audioCtx.currentTime;
+            // 중복 재생 방지 (1초에 한 번만)
+            if (now - lastBeepTime < 0.9) return;
+            lastBeepTime = now;
 
-        btnEnter.addEventListener('click', () => {
-            if (passwordInput.value === '0911') {
-                showScreen('letter-screen');
-                startLetterAnimation();
-            } else {
-                errorMsg.classList.remove('hidden');
-                passwordInput.value = '';
-                passwordInput.focus();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        }
+
+        function playExplosionSound() {
+            if (!isAudioUnlocked || !audioCtx) return;
+            const now = audioCtx.currentTime;
+            const duration = 2.5;
+
+            // 노이즈 버퍼 생성 (화이트 노이즈)
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
             }
-        });
 
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                btnEnter.click();
-            }
-        });
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
 
-        // --- 4. 편지 애니메이션 ---
-        const letters = [
-            { jp: "みずはへ", ko: "미즈하에게" },
-            { jp: "私たちが一緒に過ごして、もう1年が経ちましたね。", ko: "우리가 함께한 지 벌써 1년이 지났네요." },
-            { jp: "この1年間、本当にありがとう。", ko: "이 1년 동안, 정말 고마워요." },
-            { jp: "あなたの教えのおかげで、私はまともな人に変わることができました。（笑）", ko: "당신의 가르침 덕분에, 저는 제대로 된 사람으로 바뀔 수 있었어요. (웃음)" },
-            { jp: "私がどんな姿でも、いつも信じて支えてくれて本当に感謝しています。", ko: "내가 어떤 모습이든, 언제나 믿고 지지해 줘서 정말 감사해요." },
-            { jp: "あなたの優しさと大きな愛が、私をより良い人に成長させてくれました。", ko: "당신의 다정함과 큰 사랑이, 나를 더 나은 사람으로 성장하게 해줬어요." },
-            { jp: "これからもずっと、あなたのそばであなたを笑わせてあげたいです。", ko: "앞으로도 계속, 당신 곁에서 당신을 웃게 해주고 싶어요." },
-            { jp: "どんな困難があっても、あなたと一緒なら乗り越えられると信じています。", ko: "어떤 어려움이 있어도, 당신과 함께라면 이겨낼 수 있다고 믿어요." },
-            { jp: "私の残りの人生すべてを、あなたと一緒に歩んでいきたいです。", ko: "내 남은 인생 전부를, 당신과 함께 걸어가고 싶어요." }
-        ];
+            // 로우패스 필터로 웅장한 폭발음 만들기
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1000, now);
+            filter.frequency.exponentialRampToValueAtTime(100, now + duration);
 
-        let currentLetterIndex = 0;
-        const letterContent = document.getElementById('letter-content');
-        let letterTimeouts = [];
+            // 게인(볼륨) 엔벨로프
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-        function startLetterAnimation() {
-            if (currentLetterIndex < letters.length) {
-                letterContent.innerHTML = `
-                    <p class="text-pink-300 mb-4">${letters[currentLetterIndex].jp}</p>
-                    <p class="text-lg md:text-xl text-gray-400 font-normal">${letters[currentLetterIndex].ko}</p>
-                `;
+            noiseSource.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            noiseSource.start(now);
+        }
+
+        // --- STREAMING_CHUNK:Wedding March Logic ---
+        function playWeddingMarch() {
+            if (!isAudioUnlocked || !audioCtx) return;
+            
+            // 딴 딴딴 딴~ (결혼 행진곡 멜로디 주파수 및 박자)
+            const notes = [
+                { f: 261.63, d: 0.4, wait: 0.4 }, // C4
+                { f: 349.23, d: 0.8, wait: 0.9 }, // F4
+                { f: 349.23, d: 0.3, wait: 0.4 }, // F4
+                { f: 349.23, d: 1.0, wait: 1.2 }, // F4
+                { f: 261.63, d: 0.4, wait: 0.4 }, // C4
+                { f: 349.23, d: 0.8, wait: 0.9 }, // F4
+                { f: 440.00, d: 0.3, wait: 0.4 }, // A4
+                { f: 392.00, d: 1.0, wait: 1.2 }, // G4
+                { f: 261.63, d: 0.4, wait: 0.4 }, // C4
+                { f: 349.23, d: 0.8, wait: 0.9 }, // F4
+                { f: 440.00, d: 0.3, wait: 0.4 }, // A4
+                { f: 523.25, d: 1.2, wait: 1.5 }  // C5 (마지막 피날레 음)
+            ];
+            
+            let startTime = audioCtx.currentTime;
+            
+            // 파이프 오르간 느낌을 내기 위해 두 개의 오실레이터를 섞음
+            notes.forEach(note => {
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
                 
-                const t1 = setTimeout(() => {
-                    letterContent.classList.add('show');
-                }, 100);
-
-                const t2 = setTimeout(() => {
-                    letterContent.classList.remove('show');
-                    currentLetterIndex++;
-                    
-                    const t3 = setTimeout(startLetterAnimation, 1500);
-                    letterTimeouts.push(t3);
-                }, 4000);
-
-                letterTimeouts.push(t1, t2);
-            } else {
-                showScreen('proposal-screen');
-                initNoButton();
-            }
+                osc1.type = 'triangle';
+                osc2.type = 'sine';
+                
+                osc1.frequency.setValueAtTime(note.f, startTime);
+                osc2.frequency.setValueAtTime(note.f / 2, startTime); // 한 옥타브 아래
+                
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.4, startTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + note.d);
+                
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc1.start(startTime);
+                osc2.start(startTime);
+                osc1.stop(startTime + note.d);
+                osc2.stop(startTime + note.d);
+                
+                startTime += note.wait;
+            });
         }
 
-        // --- 5. 프러포즈 'NO' 버튼 장난 로직 ---
-        const btnNo = document.getElementById('btn-no');
-        let noCount = 0;
-        let noBtnInitialized = false;
-        
-        const funnyMessages = [
-            "えっ？ (어?)",
-            "本気？ (진심이야?)",
-            "もう一度考えて！ (다시 생각해봐!)",
-            "冗談でしょ？ (농담이지?)",
-            "押させないよ！ (못 누를걸!)",
-            "お願い！YESを押して！ (제발 YES를 눌러!)"
-        ];
-
-        function initNoButton() {
-            if (noBtnInitialized) return;
-            noBtnInitialized = true;
-            btnNo.addEventListener('mouseenter', dodgeButton);
-            btnNo.addEventListener('touchstart', (e) => {
-                e.preventDefault(); 
-                dodgeButton();
-            }, { passive: false });
-        }
-
-        function dodgeButton() {
-            noCount++;
+        // --- STREAMING_CHUNK:Intro Countdown Logic ---
+        function startIntroCountdown() {
+            if (introTimerInterval) clearInterval(introTimerInterval);
             
-            btnNo.style.position = 'fixed';
-            btnNo.style.zIndex = '9999';
-            
-            const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20) + 10;
-            const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20) + 10;
-            
-            btnNo.style.left = `${x}px`;
-            btnNo.style.top = `${y}px`;
-            
-            let scale = Math.max(1 - (noCount * 0.1), 0.5);
-            btnNo.style.transform = `scale(${scale})`;
-
-            if (noCount <= funnyMessages.length) {
-                btnNo.innerHTML = funnyMessages[noCount - 1];
-            } else {
-                btnNo.innerHTML = "😭";
-            }
-        }
-
-        // --- 6. 'YES' 버튼 성공 로직 및 폭죽 효과 ---
-        const btnYes = document.getElementById('btn-yes');
-        
-        btnYes.addEventListener('click', () => {
-            showScreen('success-screen');
-            triggerConfetti();
-            startLiveCounter();
-        });
-
-        function triggerConfetti() {
-            const duration = 5 * 1000;
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
-
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-
-                const particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
-        }
-
-        // --- 7. 실시간 함께한 시간 카운터 & 1주년 피날레 ---
-        let globalStartDate = new Date("2025-09-11T00:00:00").getTime();
-        let liveCounterInterval;
-        let megaEventTriggered = false;
-
-        function startLiveCounter() {
-            const counterEl = document.getElementById('live-counter');
-            if (liveCounterInterval) clearInterval(liveCounterInterval);
-
-            const startDateObj = new Date(globalStartDate);
-            const oneYearTarget = new Date(startDateObj.getFullYear() + 1, startDateObj.getMonth(), startDateObj.getDate()).getTime();
-
-            liveCounterInterval = setInterval(() => {
+            introTimerInterval = setInterval(() => {
                 const now = new Date().getTime();
-                const diff = now - globalStartDate;
+                const diff = targetDate.getTime() - now;
 
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                if (diff > 60000) {
+                    // 1분 이상 남았을 때: 일반 타이머 표시
+                    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-                counterEl.innerHTML = `
-                    <div class="text-sm text-pink-300 mb-1">私たちが愛し合ってから</div>
-                    <div class="font-bold text-white tracking-widest text-lg">${days}日 ${hours}時間 ${minutes}分 ${seconds}秒</div>
-                    <div class="text-xs text-gray-400 mt-1">우리가 사랑한 지</div>
-                `;
-
-                if (now >= oneYearTarget && !megaEventTriggered) {
-                    triggerMegaAnniversary();
+                    document.getElementById('cd-days').innerText = String(d).padStart(2, '0');
+                    document.getElementById('cd-hours').innerText = String(h).padStart(2, '0');
+                    document.getElementById('cd-mins').innerText = String(m).padStart(2, '0');
+                    document.getElementById('cd-secs').innerText = String(s).padStart(2, '0');
+                } 
+                else if (diff > 0 && diff <= 60000) {
+                    // 60초 이하 남았을 때: 심장박동 화면으로 전환
+                    document.getElementById('intro-countdown-screen').classList.remove('active');
+                    document.getElementById('sixty-sec-countdown').classList.add('active');
+                    
+                    const secLeft = Math.ceil(diff / 1000);
+                    document.getElementById('sixty-sec-text').innerText = secLeft;
+                    playBeep();
+                } 
+                else {
+                    // 타이머 종료 (1주년 도달)
+                    clearInterval(introTimerInterval);
+                    triggerFinaleEvent();
                 }
-
             }, 1000);
         }
 
-        function triggerMegaAnniversary() {
-            megaEventTriggered = true; 
-            const megaEventUI = document.getElementById('mega-anniversary-event');
-            megaEventUI.classList.add('show');
-
-            const firework1 = document.getElementById('sfx-firework-1');
-            const firework2 = document.getElementById('sfx-firework-2');
-            const firework3 = document.getElementById('sfx-firework-3');
-            const bgm = document.getElementById('finale-bgm');
-
-            if(bgm) { bgm.volume = 0.6; bgm.play().catch(e => console.log("자동재생 차단됨")); }
+        // --- STREAMING_CHUNK:Mega Finale Event ---
+        function triggerFinaleEvent() {
+            // 0초 땡! 폭발 시작!
             
-            if(firework1) { firework1.volume = 1.0; firework1.play(); }
-            document.body.classList.add('screen-shake');
-            setTimeout(() => document.body.classList.remove('screen-shake'), 1000);
+            // 1. 시각적 폭발 플래시 효과
+            const flashOverlay = document.getElementById('big-flash');
+            flashOverlay.classList.add('active');
+            setTimeout(() => flashOverlay.classList.remove('active'), 1000);
 
-            const duration = 25 * 1000;
-            const end = Date.now() + duration;
+            // 2. 즉각적인 대형 폭죽 버스트 (화면 중앙에서 펑!)
+            confetti({
+                particleCount: 300,
+                spread: 180,
+                origin: { y: 0.5 },
+                colors: ['#ffffff', '#ffeb3b', '#ff5722', '#ff0000'],
+                ticks: 500,
+                gravity: 2,
+                scalar: 2,
+                zIndex: 999998
+            });
 
-            (function frame() {
-                confetti({
-                    particleCount: 25,
-                    startVelocity: 60,
-                    spread: 360,
-                    ticks: 100,
-                    origin: { x: Math.random(), y: Math.random() - 0.2 },
-                    colors: ['#ff0a54', '#ff477e', '#ff7096', '#ffffff', '#ffd700'],
-                    zIndex: 100000
-                });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
+            // 화면 전환
+            document.getElementById('sixty-sec-countdown').classList.remove('active');
+            document.getElementById('intro-countdown-screen').classList.remove('active');
+            
+            // 비밀번호 창을 미리 바닥에 깔아둠
+            document.getElementById('password-screen').classList.add('active');
+            
+            const megaUI = document.getElementById('mega-anniversary-event');
+            megaUI.classList.add('active');
+            megaUI.style.opacity = '1';
+            
+            // 시네마틱 텍스트 연출
+            setTimeout(() => document.getElementById('cinematic-1').classList.add('show'), 1000);
+            setTimeout(() => document.getElementById('cinematic-1').classList.remove('show'), 3500);
+            
+            setTimeout(() => document.getElementById('cinematic-2').classList.add('show'), 4000);
+            setTimeout(() => document.getElementById('cinematic-2').classList.remove('show'), 6500);
+            
+            setTimeout(() => document.getElementById('cinematic-3').classList.add('show'), 7000);
+            setTimeout(() => document.getElementById('cinematic-3').classList.remove('show'), 9500);
 
-            const seq1 = document.getElementById('seq-1');
-            const seq2 = document.getElementById('seq-2');
-            const seq3 = document.getElementById('seq-3');
-            const finale = document.getElementById('finale-text');
-
-            setTimeout(() => { seq1.classList.add('active'); }, 1000);
-            setTimeout(() => { seq1.classList.remove('active'); seq1.style.opacity = '0'; }, 4500);
-
+            // 대망의 폭발 연출 + 결혼 행진곡
             setTimeout(() => {
-                if(firework2) { firework2.currentTime = 0; firework2.volume = 1.0; firework2.play(); }
-                document.body.classList.add('screen-shake');
-                setTimeout(() => document.body.classList.remove('screen-shake'), 800);
-                seq2.classList.add('active');
-            }, 5500);
-            setTimeout(() => { seq2.classList.remove('active'); seq2.style.opacity = '0'; }, 9000);
-
-            setTimeout(() => {
-                if(firework1) { firework1.currentTime = 0; firework1.volume = 1.0; firework1.play(); }
-                document.body.classList.add('screen-shake');
-                setTimeout(() => document.body.classList.remove('screen-shake'), 800);
-                seq3.classList.add('active');
-            }, 10000);
-            setTimeout(() => { seq3.classList.remove('active'); seq3.style.opacity = '0'; }, 13500);
-
-            setTimeout(() => {
-                if(firework3) { firework3.volume = 1.0; firework3.currentTime = 0; firework3.play(); }
-                document.body.classList.add('screen-shake');
-                setTimeout(() => document.body.classList.remove('screen-shake'), 2000);
-
-                finale.classList.add('active');
-
-                for (let i = 0; i < 100; i++) {
-                    setTimeout(() => {
-                        const heart = document.createElement('div');
-                        heart.innerHTML = ['❤️', '💖', '💘', '🎇', '🎉'][Math.floor(Math.random() * 5)];
-                        heart.classList.add('mega-heart');
-                        heart.style.left = '50%';
-                        heart.style.top = '50%';
-                        
-                        const tx = (Math.random() - 0.5) * 300 + 'vw';
-                        const ty = (Math.random() - 0.5) * 300 + 'vh';
-                        const rot = (Math.random() - 0.5) * 1080 + 'deg';
-                        
-                        heart.style.setProperty('--tx', tx);
-                        heart.style.setProperty('--ty', ty);
-                        heart.style.setProperty('--rot', rot);
-                        
-                        heart.style.fontSize = (Math.random() * 15 + 10) + 'rem';
-                        heart.style.animationDuration = (Math.random() * 1.5 + 0.5) + 's';
-                        
-                        megaEventUI.appendChild(heart);
-                        setTimeout(() => heart.remove(), 2500);
-                    }, i * 50); 
-                }
-            }, 15000);
-
-            setTimeout(() => {
-                megaEventUI.style.transition = "opacity 3s ease";
-                megaEventUI.style.opacity = "0";
+                playExplosionSound();
+                document.body.classList.add('shake-screen');
+                
+                // 배경 점멸 애니메이션 및 결혼 행진곡 시작
                 setTimeout(() => {
-                    megaEventUI.classList.remove('show');
-                    megaEventUI.style.opacity = "1"; 
+                    megaUI.style.animation = 'flashBackground 1s infinite alternate';
+                    playWeddingMarch();
+                }, 500);
+
+                // 역대급 폭죽 (화면 전체에서 무작위로 발사, 12초간 지속)
+                const duration = 12000; 
+                const end = Date.now() + duration;
+                (function frame() {
+                    // 무작위 위치에서 터지는 서브 폭죽
+                    confetti({
+                        particleCount: 20,
+                        angle: Math.random() * 360,
+                        spread: 120,
+                        origin: { x: Math.random(), y: Math.random() },
+                        colors: ['#ff0000', '#ff69b4', '#ffffff', '#ffd700', '#00ffff'],
+                        shapes: ['circle', 'square'],
+                        scalar: Math.random() * 1.5 + 0.5
+                    });
+                    // 양옆에서 쏘아 올리는 메인 폭죽
+                    confetti({
+                        particleCount: 15,
+                        angle: 60,
+                        spread: 100,
+                        origin: { x: 0, y: 0.8 },
+                        colors: ['#ff0000', '#ff69b4', '#ffffff']
+                    });
+                    confetti({
+                        particleCount: 15,
+                        angle: 120,
+                        spread: 100,
+                        origin: { x: 1, y: 0.8 },
+                        colors: ['#ff0000', '#ff69b4', '#ffffff']
+                    });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                }());
+
+                const finaleText = document.getElementById('huge-finale');
+                finaleText.style.animation = 'textPop 0.5s ease-out forwards';
+                
+                // 감동적인 메시지 펑펑 터지기 시작 (메인 텍스트 이후)
+                setTimeout(() => {
+                    spawnPoppingWords(megaUI);
+                }, 2500);
+
+            }, 10500);
+
+            // 24초 후(결혼 행진곡 종료 후) 페이드 아웃 시작
+            setTimeout(() => {
+                megaUI.style.transition = "opacity 3s ease-in-out";
+                megaUI.style.opacity = "0";
+                megaUI.style.animation = ""; // 점멸 애니메이션 리셋
+                document.body.classList.remove('shake-screen');
+                
+                setTimeout(() => {
+                    megaUI.classList.remove('active');
+                    megaUI.style.transition = ""; // 리셋
                 }, 3000);
-            }, 30000);
+            }, 24000);
         }
 
-        // --- 8. 모달 제어 및 캡쳐(저장) 기능 ---
-        const btnHiddenVideo = document.getElementById('btn-hidden-video');
-        const videoModal = document.getElementById('video-modal');
-        const closeModal = document.getElementById('close-modal');
-        const captureBtn = document.getElementById('capture-btn');
-
-        btnHiddenVideo.addEventListener('click', () => {
-            videoModal.classList.add('show');
-            videoModal.scrollTop = 0;
-        });
-
-        closeModal.addEventListener('click', () => {
-            videoModal.classList.remove('show');
-        });
-
-        captureBtn.addEventListener('click', () => {
-            const captureArea = document.getElementById('capture-area');
-            videoModal.scrollTop = 0;
+        function spawnPoppingWords(container) {
+            const messages = [
+                "앞으로 영원히 행복하자! 💖",
+                "세상에서 제일 사랑해! 😍",
+                "항상 웃게 해줄게! ✨",
+                "너는 내 삶의 기적이야 🌸",
+                "나랑 결혼해줘서 고마워 💍",
+                "평생 지켜줄게! 🛡️"
+            ];
             
-            const originalText = captureBtn.innerHTML;
-            captureBtn.innerHTML = "⏳ 保存中... (저장중...)";
-            captureBtn.disabled = true;
+            const colors = ['#ff69b4', '#00ffff', '#ffd700', '#ff4500', '#00ff00', '#ff1493'];
+            let count = 0;
+            
+            const interval = setInterval(() => {
+                if (count >= messages.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                const el = document.createElement('div');
+                el.className = 'popping-word';
+                el.innerText = messages[count];
+                
+                // 랜덤 위치 지정 (중앙 주변 20% ~ 80% 사이)
+                const randomX = Math.random() * 60 + 20; 
+                const randomY = Math.random() * 60 + 20; 
+                el.style.left = `${randomX}vw`; 
+                el.style.top = `${randomY}vh`;
+                
+                // 네온 효과 색상 변경
+                const color = colors[count % colors.length];
+                el.style.textShadow = `0 0 15px ${color}, 0 0 30px ${color}, 0 0 50px #fff`;
+                
+                el.style.animation = 'fireworkText 2.5s ease-out forwards';
+                
+                container.appendChild(el);
+                
+                // 펑 터지는 사운드 효과
+                if(audioCtx && isAudioUnlocked) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                }
+                
+                setTimeout(() => { if(el.parentNode) el.remove(); }, 2500);
+                count++;
+            }, 1300); // 1.3초 간격으로 펑펑!
+        }
 
-            html2canvas(captureArea, {
-                scale: 2, 
-                backgroundColor: null, 
-                logging: false,
-                useCORS: true
-            }).then(canvas => {
-                const image = canvas.toDataURL("image/png");
-                const link = document.createElement('a');
-                link.href = image;
-                link.download = 'Letter_to_Mizuha.png';
-                link.click();
-
-                captureBtn.innerHTML = "✅ 保存完了! (저장완료!)";
-                setTimeout(() => {
-                    captureBtn.innerHTML = originalText;
-                    captureBtn.disabled = false;
-                }, 3000);
-            }).catch(err => {
-                console.error("Capture failed:", err);
-                captureBtn.innerHTML = "❌ エラー (오류발생)";
-                captureBtn.disabled = false;
+        // --- STREAMING_CHUNK:Password Logic ---
+        const inputs = document.querySelectorAll('.pwd-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                }
             });
         });
 
-        // --- 9. 디버깅 모드 (개발자/테스트용) ---
-        let debugMode = false;
-        let keyBuffer = "";
-        const debugMenu = document.getElementById('debug-menu');
-        const closeDebugBtn = document.getElementById('close-debug');
+        function checkPassword() {
+            let pwd = Array.from(inputs).map(i => i.value).join('');
+            if (pwd === "0911") {
+                document.getElementById('pwd-error').style.opacity = "0";
+                startLetterAnimation();
+            } else {
+                const err = document.getElementById('pwd-error');
+                err.style.opacity = "1";
+                inputs.forEach(i => i.value = '');
+                inputs[0].focus();
+                setTimeout(() => err.style.opacity = "0", 2000);
+            }
+        }
 
-        closeDebugBtn.addEventListener('click', () => {
-            debugMenu.classList.add('hidden');
+        // --- STREAMING_CHUNK:Letter Animation Logic ---
+        const letters = [
+            { jp: "みずはへ、", kr: "미즈하에게," },
+            { jp: "私たちが初めて会った日を覚えていますか？", kr: "우리가 처음 만난 날을 기억해?" },
+            { jp: "時間が経つのは本当に早いですね。", kr: "시간이 지나는 게 정말 빠르네." },
+            { jp: "言葉も文化も違うけれど、", kr: "말도 문화도 다르지만," },
+            { jp: "あなたはいつも僕を理解してくれました。", kr: "당신은 언제나 나를 이해해 주었어." },
+            { jp: "未熟だった僕が、少しずつ変われたのは", kr: "미숙했던 내가 조금씩 바뀔 수 있었던 건" },
+            { jp: "あなたの愛と教えがあったからです。", kr: "당신의 사랑과 가르침 덕분이야." },
+            { jp: "僕のそばにいてくれて、本当にありがとう。", kr: "내 곁에 있어줘서 정말 고마워." },
+            { jp: "これからもずっと、あなたを大切にします。", kr: "앞으로도 계속, 당신을 소중히 여길게." }
+        ];
+
+        function startLetterAnimation() {
+            showScreen('letter-screen');
+            startFallingEmojis('falling-container', ['🌸', '✨', '🌷', '💌', '💖']);
+            const container = document.getElementById('letter-content');
+            container.innerHTML = '';
+            
+            let delay = 0;
+            letters.forEach((item, index) => {
+                setTimeout(() => {
+                    container.innerHTML = `
+                        <div class="text-center fade-in absolute w-full">
+                            <p class="text-3xl text-pink-300 font-bold mb-4 font-jp drop-shadow-lg leading-relaxed">${item.jp}</p>
+                            <p class="text-lg text-gray-300 drop-shadow-md">${item.kr}</p>
+                        </div>
+                    `;
+                }, delay);
+                
+                // 마지막 문장이 아니면 페이드아웃
+                if (index < letters.length - 1) {
+                    setTimeout(() => {
+                        const el = container.querySelector('.fade-in');
+                        if(el) {
+                            el.style.animation = 'fadeOut 1s forwards';
+                        }
+                    }, delay + 4000);
+                    delay += 5500;
+                } else {
+                    // 마지막 문장 후 프러포즈 화면으로
+                    setTimeout(() => {
+                        showScreen('propose-screen');
+                        startFallingEmojis('falling-container-2', ['💍', '💒', '🥂', '💖']);
+                        setupNoButton();
+                    }, delay + 5000);
+                }
+            });
+        }
+
+        // --- STREAMING_CHUNK:Falling Emojis Helper ---
+        function startFallingEmojis(containerId, emojiArr) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const createEmoji = () => {
+                const el = document.createElement('div');
+                el.classList.add('falling-element');
+                el.innerText = emojiArr[Math.floor(Math.random() * emojiArr.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+                el.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                el.style.opacity = Math.random() * 0.5 + 0.3;
+                container.appendChild(el);
+                
+                setTimeout(() => {
+                    if (el.parentNode) el.parentNode.removeChild(el);
+                }, 7000);
+            };
+
+            // 주기적으로 생성
+            const interval = setInterval(() => {
+                if (document.getElementById(containerId).parentNode.classList.contains('active')) {
+                    createEmoji();
+                } else {
+                    clearInterval(interval);
+                }
+            }, 300);
+        }
+
+        // --- STREAMING_CHUNK:Tricky 'No' Button Logic ---
+        let noBtnClickCount = 0;
+        const funnyMessages = [
+            "えっ？ (어?)", "本気？ (진심이야?)", "もう一回考えて！ (다시 생각해봐!)", 
+            "押せないよ〜 (못 누르지~)", "こっちこっち！ (여기여기!)", "絶対ダメ！ (절대 안돼!)"
+        ];
+
+        function setupNoButton() {
+            const noBtn = document.getElementById('no-btn');
+            noBtn.style.position = 'absolute';
+            // 초기 위치 (우측 정렬)
+            noBtn.style.right = 'calc(50% - 140px)';
+            noBtn.style.top = 'auto';
+            noBtn.style.left = 'auto';
+            
+            const moveBtn = (e) => {
+                e.preventDefault();
+                noBtnClickCount++;
+                
+                // 크기 줄이기
+                let scale = Math.max(0.3, 1 - (noBtnClickCount * 0.1));
+                noBtn.style.transform = `scale(${scale})`;
+                
+                // 문구 변경
+                noBtn.innerText = funnyMessages[noBtnClickCount % funnyMessages.length];
+                
+                // 도망가기 (화면 내 랜덤 위치)
+                const maxX = window.innerWidth - noBtn.clientWidth;
+                const maxY = window.innerHeight - noBtn.clientHeight;
+                
+                const randomX = Math.floor(Math.random() * (maxX - 40)) + 20;
+                const randomY = Math.floor(Math.random() * (maxY - 40)) + 20;
+                
+                noBtn.style.left = `${randomX}px`;
+                noBtn.style.top = `${randomY}px`;
+                noBtn.style.right = 'auto';
+            };
+
+            noBtn.addEventListener('mouseover', moveBtn);
+            noBtn.addEventListener('touchstart', moveBtn, {passive: false});
+        }
+
+        // --- STREAMING_CHUNK:Success & Modal Logic ---
+        function acceptProposal() {
+            confetti({
+                particleCount: 150,
+                spread: 180,
+                origin: { y: 0.6 },
+                colors: ['#ff69b4', '#ff1493', '#ffc0cb']
+            });
+            showScreen('success-screen');
+            startLoveTimer();
+        }
+
+        function startLoveTimer() {
+            setInterval(() => {
+                const now = new Date();
+                const diff = now - firstDay;
+                
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById('love-timer').innerText = `${d}日 ${h}時間 ${m}分 ${s}秒`;
+            }, 1000);
+        }
+
+        function openModal() {
+            document.getElementById('modal-screen').classList.remove('hidden');
+            document.getElementById('modal-screen').classList.add('flex');
+            // 스크롤 최상단으로
+            document.getElementById('modal-content').scrollTop = 0;
+        }
+
+        function closeModal() {
+            document.getElementById('modal-screen').classList.add('hidden');
+            document.getElementById('modal-screen').classList.remove('flex');
+        }
+
+        function captureLetter() {
+            const captureArea = document.getElementById('capture-area');
+            const buttons = document.getElementById('modal-buttons');
+            
+            // 캡쳐 전 스크롤 최상단 고정 및 버튼 숨기기
+            const content = document.getElementById('modal-content');
+            content.scrollTop = 0;
+            content.style.maxHeight = 'none'; 
+            buttons.style.display = 'none';
+            
+            html2canvas(captureArea, {
+                scale: 2,
+                backgroundColor: null,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Letter_to_Mizuha.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // 복구
+                content.style.maxHeight = '80vh';
+                buttons.style.display = 'flex';
+            }).catch(err => {
+                alert("캡쳐 중 오류가 발생했습니다.");
+                content.style.maxHeight = '80vh';
+                buttons.style.display = 'flex';
+            });
+        }
+
+        // --- STREAMING_CHUNK:Debug & Admin System ---
+        document.addEventListener('keydown', (e) => {
+            keyBuffer += e.key.toLowerCase();
+            if (keyBuffer.length > 20) keyBuffer = keyBuffer.slice(-20);
+            
+            if (cheatCodes.some(code => keyBuffer.includes(code))) {
+                toggleDebugMenu();
+                keyBuffer = ""; 
+            }
         });
 
-        function showToast(msg) {
-            const toast = document.getElementById('debug-toast');
-            toast.innerText = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
+        function toggleDebugMenu() {
+            const menu = document.getElementById('debug-menu');
+            menu.classList.toggle('active');
         }
 
-        function forceShowScreen(screenId) {
-            letterTimeouts.forEach(t => clearTimeout(t));
-            letterTimeouts = [];
-            letterContent.classList.remove('show');
-            
+        function jumpToScreen(screenId) {
+            if(introTimerInterval) clearInterval(introTimerInterval);
             showScreen(screenId);
             
-            if (screenId === 'proposal-screen') {
-                initNoButton();
+            if(screenId === 'propose-screen') {
+                startFallingEmojis('falling-container-2', ['💍', '💒', '🥂', '💖']);
+                setupNoButton();
             } else if (screenId === 'success-screen') {
-                startLiveCounter();
-            }
-            showToast(screenId + " (으)로 이동됨");
-        }
-
-        function updateGlobalDate() {
-            const inputDate = document.getElementById('debug-date').value;
-            const newDate = new Date(inputDate + "T00:00:00");
-            if (!isNaN(newDate.getTime())) {
-                globalStartDate = newDate.getTime();
-                megaEventTriggered = false; 
-                showToast("기념일이 " + inputDate + " 로 변경됨!");
-                if (document.getElementById('success-screen').classList.contains('active')) {
-                    startLiveCounter();
-                }
-            } else {
-                showToast("잘못된 날짜 형식입니다!");
+                startLoveTimer();
             }
         }
 
-        function setAlmostOneYear() {
-            const now = new Date();
-            const almostOneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds() + 5);
-            
-            globalStartDate = almostOneYearAgo.getTime();
-            megaEventTriggered = false;
-            
-            const yyyy = almostOneYearAgo.getFullYear();
-            const mm = String(almostOneYearAgo.getMonth() + 1).padStart(2, '0');
-            const dd = String(almostOneYearAgo.getDate()).padStart(2, '0');
-            document.getElementById('debug-date').value = `${yyyy}-${mm}-${dd}`;
-            
-            showToast("⏰ 1주년 달성 5초 전으로 세팅완료!");
-            forceShowScreen('success-screen');
+        function testFirework() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
         }
 
         function resetNoButton() {
-            noCount = 0;
-            btnNo.style.position = 'static';
-            btnNo.style.transform = 'none';
-            btnNo.innerHTML = "いいえ (아니요)";
-            showToast("NO 버튼이 원위치로 복구됨!");
+            const noBtn = document.getElementById('no-btn');
+            noBtn.style.left = 'auto';
+            noBtn.style.top = 'auto';
+            noBtn.style.right = 'calc(50% - 140px)';
+            noBtn.style.transform = 'scale(1)';
+            noBtn.innerText = 'いいえ (아니요)';
+            noBtnClickCount = 0;
         }
 
-        function skipToNextScene() {
-            const activeScreen = document.querySelector('.screen.active');
-            
-            if (activeScreen.id === 'intro-screen') {
-                forceShowScreen('letter-screen');
-                startLetterAnimation();
-            } 
-            else if (activeScreen.id === 'letter-screen') {
-                forceShowScreen('proposal-screen');
-            } 
-            else if (activeScreen.id === 'proposal-screen') {
-                forceShowScreen('success-screen');
-            } 
-            else if (activeScreen.id === 'success-screen') {
-                const videoModal = document.getElementById('video-modal');
-                if (!videoModal.classList.contains('show')) {
-                    document.getElementById('btn-hidden-video').click();
-                    showToast("마지막 편지 열기");
-                } else {
-                    document.getElementById('close-modal').click();
-                    showToast("편지 닫기");
-                }
+        function applyDebugDate() {
+            const inputVal = document.getElementById('debug-date').value;
+            if (inputVal) {
+                firstDay = new Date(inputVal);
+                targetDate = new Date(firstDay.getTime() + (365 * 24 * 60 * 60 * 1000));
+                alert(`적용 완료!\n사귄 날짜: ${firstDay.toLocaleString()}\n1주년: ${targetDate.toLocaleString()}`);
             }
         }
 
-        window.addEventListener('keydown', (e) => {
-            if (document.activeElement.tagName === 'INPUT' && document.activeElement.id === 'debug-date') {
-                return;
-            }
+        // 65초 전 세팅 (일반 카운트다운 테스트)
+        function triggerMegaEventTimerTest() {
+            if(introTimerInterval) clearInterval(introTimerInterval);
+            showScreen('intro-countdown-screen');
+            // 지금 시간 + 65초를 1주년(targetDate)으로 조작
+            targetDate = new Date(new Date().getTime() + 65000);
+            firstDay = new Date(targetDate.getTime() - (365 * 24 * 60 * 60 * 1000));
+            startIntroCountdown();
+            toggleDebugMenu();
+        }
 
-            if (debugMode && e.code === 'Space') {
-                e.preventDefault(); 
-                skipToNextScene();
-                return;
-            }
-
-            if (e.ctrlKey || e.altKey || e.metaKey) return;
-            if (e.key && e.key !== 'Process') {
-                keyBuffer += e.key.toLowerCase();
-            }
-        });
-
-        window.addEventListener('compositionend', (e) => {
-            if (e.data) {
-                keyBuffer += e.data;
-            }
-            checkDebugKeyword();
-        });
-
-        window.addEventListener('keyup', (e) => {
-            checkDebugKeyword();
-        });
-
-        function checkDebugKeyword() {
-            if (keyBuffer.length > 30) {
-                keyBuffer = keyBuffer.slice(-30);
-            }
-            
-            if (keyBuffer.includes("디버깅") || keyBuffer.includes("elqjrld")) {
-                debugMode = true;
-                keyBuffer = ""; 
-                
-                if (debugMenu.classList.contains('hidden')) {
-                    debugMenu.classList.remove('hidden');
-                    showToast("🛠 관리자 메뉴 오픈!");
-                } else {
-                    debugMenu.classList.add('hidden');
-                    showToast("🛠 관리자 메뉴 닫힘");
-                }
-            }
+        // 5초 전 세팅 (스페셜 피날레 직행 테스트)
+        function triggerMegaEventCountdownTest() {
+            if(introTimerInterval) clearInterval(introTimerInterval);
+            showScreen('sixty-sec-countdown');
+            targetDate = new Date(new Date().getTime() + 5000); // 5초 뒤 폭발
+            firstDay = new Date(targetDate.getTime() - (365 * 24 * 60 * 60 * 1000));
+            startIntroCountdown();
+            toggleDebugMenu();
         }
 
     </script>
