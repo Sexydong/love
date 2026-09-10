@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>1st Anniversary & Proposal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            overflow: hidden; /* 화면 넘어가는 것 방지 */
+            touch-action: none; /* 모바일에서 스크롤 방지 */
+        }
+
+        /* 하트 배경 애니메이션 */
+        .heart-bg {
+            position: absolute;
+            top: -10vh;
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 0;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 텍스트 글로우 효과 */
+        .text-glow {
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.8), 0 0 30px rgba(255, 105, 180, 0.5);
+        }
+
+        .screen {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 10;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* 입력창 스타일링 */
+        .glass-input {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ff69b4;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+        }
+
+        /* 에러 메시지 쉐이크 애니메이션 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* 장난치는 NO 버튼 트랜지션 */
+        #btn-no {
+            transition: top 0.2s ease-out, left 0.2s ease-out, transform 0.2s ease, width 0.2s, height 0.2s, font-size 0.2s, padding 0.2s;
+        }
+
+        #video-modal {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+        #video-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col items-center justify-center relative">
+
+    <div id="particles" class="absolute inset-0 pointer-events-none z-0"></div>
+
+    <div id="login-screen" class="screen active flex-col items-center justify-center w-full h-full p-4 relative z-10">
+        <div class="bg-black/30 p-8 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl flex flex-col items-center max-w-md w-full">
+            <h1 class="text-2xl md:text-3xl font-bold mb-2 text-glow text-center text-pink-300">私たちの始まりの日</h1>
+            <p class="text-sm md:text-base text-gray-300 mb-8 text-center">우리가 처음 만난 날은 언제일까? (MMDD)</p>
+            
+            <input type="password" id="password-input" maxlength="4" placeholder="0911" class="glass-input w-48 mb-6" inputmode="numeric">
+            
+            <p id="error-msg" class="text-red-400 text-sm mb-4 h-5 opacity-0 transition-opacity">다시 한 번 잘 생각해봐! (もう一度考えてみて！)</p>
+            
+            <button id="login-btn" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95">
+                열기 (開く)
+            </button>
+        </div>
+    </div>
+
+    <div id="letter-screen" class="screen flex-col items-center justify-center w-full h-full p-6 relative z-10">
+        <div id="letter-container" class="flex flex-col items-center justify-center text-center w-full max-w-4xl min-h-[200px] z-10">
+            <!-- 편지 내용이 JavaScript로 여기에 주입됩니다 -->
+        </div>
+    </div>
+
+    <div id="proposal-screen" class="screen flex-col items-center justify-center w-full h-full p-4 relative z-10">
+        <h1 class="text-4xl md:text-6xl font-bold text-glow text-pink-300 mb-4 text-center">僕と結婚してくれる？</h1>
+        <p class="text-xl md:text-2xl text-white/80 mb-16 text-center">나와 결혼해줄래?</p>
+        
+        <div class="flex gap-8 relative w-full justify-center items-center h-20" id="button-container">
+            <!-- YES 버튼 -->
+            <button id="btn-yes" class="z-20 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(255,105,180,0.6)] text-xl transform transition hover:scale-110 active:scale-95">
+                はい (네) 💍
+            </button>
+            
+            <!-- NO 버튼 (도망갈 버튼) -->
+            <button id="btn-no" class="z-20 bg-gray-600/80 backdrop-blur-sm text-white font-bold py-4 px-10 rounded-full border border-gray-400 text-xl absolute">
+                いいえ (아니요)
+            </button>
+        </div>
+    </div>
+
+    <div id="success-screen" class="screen flex-col items-center justify-center w-full h-full p-4 relative z-10">
+        <h1 class="text-5xl md:text-7xl font-bold text-glow text-rose-400 mb-6 text-center animate-bounce">ありがとう！愛してる！</h1>
+        <p class="text-2xl md:text-3xl text-white mb-8 text-center">고마워! 평생 행복하게 해줄게!</p>
+        
+        <div id="live-counter" class="text-xl md:text-2xl text-pink-200 mb-8 text-center bg-black/40 px-6 py-4 rounded-3xl border border-pink-500/30 shadow-lg backdrop-blur-md">
+            <!-- 카운터 텍스트 주입 -->
+        </div>
+
+        <div class="text-8xl mb-4">👩‍❤️‍👨</div>
+
+        <!-- 숨겨진 영상 편지 버튼 -->
+        <button id="btn-hidden-video" class="mt-8 opacity-70 hover:opacity-100 transition flex flex-col items-center gap-2 cursor-pointer group">
+            <span class="text-4xl group-hover:scale-125 transition-transform duration-300 drop-shadow-md">🎁</span>
+            <span class="text-sm text-gray-300 font-bold bg-black/50 px-3 py-1 rounded-full">마지막 선물</span>
+        </button>
+    </div>
+
+    <div id="video-modal" class="fixed inset-0 z-50 bg-black/90 flex-col items-center justify-center p-4">
+        <!-- 캡쳐될 영역 (capture-area) -->
+        <div id="capture-area" class="bg-gradient-to-br from-[#2a1b38] to-[#42275a] p-6 md:p-10 rounded-3xl border border-pink-500/50 max-w-2xl w-full text-center relative shadow-[0_0_40px_rgba(255,105,180,0.3)]">
+            <!-- data-html2canvas-ignore 속성을 넣으면 캡쳐 이미지에 이 요소가 찍히지 않습니다 -->
+            <button id="close-modal" data-html2canvas-ignore class="absolute top-4 right-5 text-white/50 text-4xl hover:text-pink-400 transition">&times;</button>
+            
+            <h2 class="text-3xl md:text-4xl font-bold text-pink-300 mb-8 text-glow">愛するみずはへ 💌<br><span class="text-lg md:text-xl text-pink-200 mt-2 block">사랑하는 미즈하에게</span></h2>
+            
+            <div class="space-y-6 text-left text-white/90 leading-relaxed font-medium mb-10 px-2 md:px-6">
+                <p class="text-lg md:text-xl">
+                    一生僕と一緒にいると約束してくれて、本当にありがとう。<br>
+                    <span class="text-sm md:text-base text-pink-200 block mt-1">평생 나와 함께 하기로 약속해줘서 정말 고마워.</span>
+                </p>
+                <p class="text-lg md:text-xl">
+                    あなたと過ごしたこの1年は、僕の人生で最も輝かしく幸せな時間だったよ。<br>
+                    <span class="text-sm md:text-base text-pink-200 block mt-1">너와 함께한 이 1년은 내 인생에서 가장 빛나고 행복한 시간이었어.</span>
+                </p>
+                <p class="text-lg md:text-xl">
+                    これから僕たちが共に歩むたくさんの日々も、今のように、いや今以上に互いを大切にし、愛し合って生きていこうね。<br>
+                    <span class="text-sm md:text-base text-pink-200 block mt-1">앞으로 우리가 함께 걸어갈 수많은 날들도, 지금처럼 아니 지금보다 더 서로를 소중히 여기며 사랑하며 살아가자.</span>
+                </p>
+                <p class="text-lg md:text-xl">
+                    あなたの笑顔が一生僕のそばにあるように、僕がもっと頑張るからね。<br>
+                    <span class="text-sm md:text-base text-pink-200 block mt-1">너의 미소가 평생 내 곁에 머물 수 있도록 내가 더 노력할게.</span>
+                </p>
+                <p class="text-xl md:text-2xl font-bold text-center mt-10 text-rose-300 text-glow">
+                    僕の永遠の婚約者、みずは。<br>心から愛してる。一生一緒にいようね！<br>
+                    <span class="text-base md:text-lg text-pink-200 block mt-2">나의 영원한 약혼자 미즈하.<br>진심으로 사랑해. 우리 평생 함께하자!</span>
+                </p>
+            </div>
+            
+            <button id="capture-btn" data-html2canvas-ignore class="bg-white/10 hover:bg-white/20 text-white border border-white/30 font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95 flex items-center justify-center gap-3 mx-auto w-full md:w-auto">
+                <span class="text-2xl">📸</span> 이 편지 간직하기 (画像として保存)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 배경 하트 생성 함수
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-bg');
+            // 하트 이모지 또는 특수기호
+            const hearts = ['❤️', '💖', '🌸', '✨', '💕'];
+            heart.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+            
+            // 랜덤 위치, 크기, 애니메이션 지속시간
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            heart.style.animationDuration = Math.random() * 3 + 3 + 's';
+            
+            document.getElementById('particles').appendChild(heart);
+            
+            // 애니메이션이 끝나면 삭제
+            setTimeout(() => {
+                heart.remove();
+            }, 6000);
+        }
+
+        // 300ms마다 하트 생성
+        setInterval(createHeart, 300);
+
+        const CORRECT_PASSWORD = "0911"; // 사귄 날짜 (9월 11일)
+        
+        const loginScreen = document.getElementById('login-screen');
+        const letterScreen = document.getElementById('letter-screen');
+        const proposalScreen = document.getElementById('proposal-screen');
+        const successScreen = document.getElementById('success-screen');
+        
+        const passInput = document.getElementById('password-input');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMsg = document.getElementById('error-msg');
+
+        // 화면 전환 함수
+        function switchScreen(from, to) {
+            from.classList.remove('active');
+            setTimeout(() => {
+                from.style.display = 'none';
+                to.style.display = 'flex';
+                // 브라우저 렌더링 틱을 위해 약간 지연
+                setTimeout(() => {
+                    to.classList.add('active');
+                }, 50);
+            }, 1000); // 1초 페이드아웃 대기
+        }
+
+        loginBtn.addEventListener('click', async () => {
+            if (passInput.value === CORRECT_PASSWORD) {
+                switchScreen(loginScreen, letterScreen);
+                setTimeout(startLetterAnimation, 1500); // 화면 전환 후 편지 시작
+            } else {
+                // 비밀번호 틀림
+                errorMsg.style.opacity = '1';
+                passInput.classList.add('shake');
+                setTimeout(() => {
+                    passInput.classList.remove('shake');
+                }, 500);
+                setTimeout(() => {
+                    errorMsg.style.opacity = '0';
+                }, 2000);
+            }
+        });
+
+        // 엔터키 지원
+        passInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+
+        const messages = [
+            { jp: "私たちが出会って、付き合い始めてから", ko: "우리가 만나고, 사귀기 시작한 지" },
+            { jp: "もう1年が経ったね。", ko: "벌써 1년이 지났네." },
+            { jp: "この1年間、本当に本当にありがとう。", ko: "이 1년 동안, 정말로 고마웠어." },
+            { jp: "振り返ってみると、あなたには感謝することばかりだよ。", ko: "돌이켜보면, 너에게는 감사할 것투성이야." },
+            { jp: "未熟だった僕に、愛のある指導をしてくれて、", ko: "부족했던 나에게 애정 어린 가르침(교육)을 주어서," },
+            { jp: "そのおかげで、僕はまともな人間になれた気がするよ。", ko: "그 덕분에 비로소 내가 제대로 된 사람이 될 수 있었어." },
+            { jp: "あなたがいなかったら、今の僕はいないと思う。", ko: "네가 없었다면, 지금의 나는 없었을 거야." },
+            { jp: "どんなに大変な時でも、", ko: "아무리 힘들 때라도," },
+            { jp: "いつも僕を信じて、一番の味方でいてくれたね。", ko: "항상 나를 믿고, 언제나 든든하게 나를 지지해 주었지." },
+            { jp: "あなたの温かい応援と支えがあったからこそ、", ko: "너의 변함없는 믿음과 지지가 있었기 때문에," },
+            { jp: "今の僕があるんだよ。本当にありがとう。", ko: "지금의 내가 있을 수 있어. 정말 고마워." },
+            { jp: "あなたと一緒にいる時間は、", ko: "너와 함께 있는 시간은," },
+            { jp: "僕にとって何にも代えがたい宝物だよ。", ko: "나에게 있어서 무엇과도 바꿀 수 없는 보물이야." },
+            { jp: "これからもずっと、僕のそばにいてほしい。", ko: "앞으로도 평생, 내 곁에 있어줘." },
+            { jp: "あなたの笑顔を一番近くで見守らせてね。", ko: "네 미소를 가장 가까이서 지켜볼 수 있게 해줘." }
+        ];
+
+        async function startLetterAnimation() {
+            const container = document.getElementById('letter-container');
+            
+            for (let i = 0; i < messages.length; i++) {
+                // DOM 요소 생성
+                const msgDiv = document.createElement('div');
+                msgDiv.className = "opacity-0 transition-opacity duration-1000 transform scale-95 transition-transform";
+                msgDiv.innerHTML = `
+                    <p class="text-3xl md:text-5xl text-white font-bold mb-6 text-glow leading-tight">${messages[i].jp}</p>
+                    <p class="text-xl md:text-2xl text-pink-200 font-medium">${messages[i].ko}</p>
+                `;
+                
+                container.innerHTML = ''; // 이전 내용 지우기
+                container.appendChild(msgDiv);
+                
+                // 페이드 인
+                setTimeout(() => {
+                    msgDiv.classList.remove('opacity-0', 'scale-95');
+                    msgDiv.classList.add('opacity-100', 'scale-100');
+                }, 100);
+                
+                // 읽을 시간 대기 (4.5초)
+                await new Promise(resolve => setTimeout(resolve, 4500));
+                
+                // 페이드 아웃
+                msgDiv.classList.remove('opacity-100', 'scale-100');
+                msgDiv.classList.add('opacity-0', 'scale-105');
+                
+                // 페이드 아웃 완료 대기 (1.2초)
+                await new Promise(resolve => setTimeout(resolve, 1200));
+            }
+            
+            // 편지 끝나고 프러포즈 화면으로 이동
+            switchScreen(letterScreen, proposalScreen);
+            initProposalScreen();
+        }
+
+        const btnNo = document.getElementById('btn-no');
+        const btnYes = document.getElementById('btn-yes');
+        const btnContainer = document.getElementById('button-container');
+        
+        function initProposalScreen() {
+            // No 버튼 초기 위치 잡기 (Yes 버튼 오른쪽 옆)
+            // CSS에서 기본적으로 겹치지 않게 flex 컨테이너 중앙에 배치되도록 했으나,
+            // absolute로 띄우기 위해 초기 위치를 설정합니다.
+            const yesRect = btnYes.getBoundingClientRect();
+            btnNo.style.left = `calc(50% + 80px)`; // 데스크탑 기준 대략적인 오른쪽 위치
+            
+            let noBtnScale = 1; // 버튼 크기 상태 추적
+
+            // 도망가는 함수
+            const evade = (e) => {
+                e.preventDefault(); // 터치 이벤트시 클릭 방지
+                
+                noBtnScale = Math.max(0.3, noBtnScale - 0.1); 
+
+                const btnWidth = btnNo.offsetWidth * noBtnScale;
+                const btnHeight = btnNo.offsetHeight * noBtnScale;
+                
+                // 화면 경계를 벗어나지 않도록 랜덤 좌표 계산
+                const maxX = window.innerWidth - btnWidth - 40;
+                const maxY = window.innerHeight - btnHeight - 40;
+                
+                const randomX = Math.max(20, Math.floor(Math.random() * maxX));
+                const randomY = Math.max(20, Math.floor(Math.random() * maxY));
+                
+                btnNo.style.position = 'fixed'; // 화면 전체 기준 이동
+                btnNo.style.left = `${randomX}px`;
+                btnNo.style.top = `${randomY}px`;
+                
+                const funnyTexts = [
+                    "えー嘘でしょ〜 (에이 거짓말~)", 
+                    "本気？ (진심이야?)", 
+                    "もう一度考えてみてㅠㅠ (다시 생각해봐 ㅠㅠ)", 
+                    "本当に？？ (진짜로??)", 
+                    "ひどい... (너무해...)", 
+                    "ダメ！！！ (안 돼!!!)",
+                    "YESを押して! (YES를 눌러!)"
+                ];
+                btnNo.innerText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
+                
+                // 회전 효과 및 크기 감소 적용
+                const randomRotation = Math.floor(Math.random() * 40) - 20; // -20deg to 20deg
+                btnNo.style.transform = `rotate(${randomRotation}deg) scale(${noBtnScale})`;
+                btnNo.style.padding = `${16 * noBtnScale}px ${40 * noBtnScale}px`; // 패딩도 줄임
+                btnNo.style.fontSize = `${1.25 * noBtnScale}rem`;
+            };
+
+            // 마우스 호버, 모바일 터치 시 도망감
+            btnNo.addEventListener('mouseover', evade);
+            btnNo.addEventListener('touchstart', evade, {passive: false});
+            btnNo.addEventListener('click', evade); // 혹시 눌러지더라도 무시하고 도망
+        }
+
+        let counterInterval;
+        function startLiveCounter() {
+            const counterEl = document.getElementById('live-counter');
+            // 사귄 날짜 설정 (작년 9월 11일 기준)
+            const startDate = new Date('2025-09-11T00:00:00');
+            
+            counterInterval = setInterval(() => {
+                const now = new Date();
+                const diff = now - startDate;
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / 1000 / 60) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+                
+                counterEl.innerHTML = `
+                    <div class="text-sm text-pink-300 mb-2">私たちが愛し合ってから (우리가 사랑한 지)</div>
+                    <div class="font-bold tracking-wider">
+                        ${days}日 ${hours}時間 ${minutes}分 <span class="text-pink-400 w-8 inline-block text-center">${seconds}</span>秒
+                    </div>
+                `;
+            }, 1000);
+        }
+
+        btnYes.addEventListener('click', () => {
+            const duration = 5 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                // 양쪽에서 폭죽 발사
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+
+            switchScreen(proposalScreen, successScreen);
+            startLiveCounter(); // 타이머 시작
+        });
+
+        const videoModal = document.getElementById('video-modal');
+        const btnHiddenVideo = document.getElementById('btn-hidden-video');
+        const closeModalBtn = document.getElementById('close-modal');
+
+        btnHiddenVideo.addEventListener('click', () => {
+            videoModal.classList.add('show');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            videoModal.classList.remove('show');
+        });
+
+        const captureBtn = document.getElementById('capture-btn');
+        captureBtn.addEventListener('click', () => {
+            const captureArea = document.getElementById('capture-area');
+            
+            // 캡쳐 중 시각적 피드백 제공
+            const originalText = captureBtn.innerHTML;
+            captureBtn.innerHTML = '<span class="text-2xl">⏳</span> 저장 중... (保存中...)';
+            
+            html2canvas(captureArea, {
+                backgroundColor: '#2a1b38', // 배경색 지정 (투명 방지 및 그라데이션 베이스톤 매칭)
+                scale: 2, // 고화질로 렌더링
+                useCORS: true 
+            }).then(canvas => {
+                // 다운로드 링크 동적 생성 및 실행
+                const link = document.createElement('a');
+                link.download = 'Letter_to_Mizuha.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // 버튼 텍스트 원상 복구
+                setTimeout(() => {
+                    captureBtn.innerHTML = '<span class="text-2xl">✅</span> 저장 완료! (保存完了!)';
+                    setTimeout(() => {
+                        captureBtn.innerHTML = originalText;
+                    }, 2000);
+                }, 500);
+            }).catch(err => {
+                console.error('Capture failed:', err);
+                captureBtn.innerHTML = '<span class="text-2xl">❌</span> 오류 발생 (エラー)';
+                setTimeout(() => { captureBtn.innerHTML = originalText; }, 2000);
+            });
+        });
+
+    </script>
+</body>
+</html>
